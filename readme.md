@@ -1,6 +1,6 @@
 # Trabajo Final Integrador – Programación Web Dinámica  
 Tecnicatura Universitaria en Desarrollo Web  
-a
+
 ## Objetivo general  
 Desarrollar una aplicación web de elección libre aplicando los conceptos vistos durante la cursada, integrando frontend, backend y base de datos bajo una arquitectura MVC, con comunicación mediante API REST.
 
