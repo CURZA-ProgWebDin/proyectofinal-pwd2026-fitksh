@@ -21,3 +21,6 @@ Thumbs.db
 
 # Registros
 *.log
+frontend/src/assets/hero.png
+frontend/src/assets/vite.svg
+frontend/src/assets/vue.svg
