@@ -1,7 +1,7 @@
 from flask import jsonify, request
 
 from app.services.product_service import ProductService
-
+from app.decorators import roles_required
 
 def list_products():
     products = ProductService.get_all()
@@ -33,7 +33,7 @@ def get_product(product_id):
         }
     ), 200
 
-
+@roles_required("ADMINISTRADOR")
 def create_product():
     data = request.get_json(silent=True)
 
@@ -61,6 +61,7 @@ def create_product():
     ), 201
 
 
+@roles_required("ADMINISTRADOR")
 def update_product(product_id):
     product = ProductService.get_by_id(product_id)
 
@@ -97,6 +98,7 @@ def update_product(product_id):
     ), 200
 
 
+@roles_required("ADMINISTRADOR")
 def delete_product(product_id):
     product = ProductService.get_by_id(product_id)
 

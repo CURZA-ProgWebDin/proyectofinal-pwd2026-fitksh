@@ -1,7 +1,7 @@
 from flask import jsonify, request
 
 from app.services.category_service import CategoryService
-
+from app.decorators import roles_required
 
 def list_categories():
     categories = CategoryService.get_all()
@@ -33,7 +33,7 @@ def get_category(category_id):
         }
     ), 200
 
-
+@roles_required("ADMINISTRADOR")
 def create_category():
     data = request.get_json(silent=True)
 
@@ -66,7 +66,7 @@ def create_category():
         }
     ), 201
 
-
+@roles_required("ADMINISTRADOR")
 def update_category(category_id):
     category = CategoryService.get_by_id(category_id)
 
@@ -109,6 +109,7 @@ def update_category(category_id):
     ), 200
 
 
+@roles_required("ADMINISTRADOR")
 def delete_category(category_id):
     category = CategoryService.get_by_id(category_id)
 

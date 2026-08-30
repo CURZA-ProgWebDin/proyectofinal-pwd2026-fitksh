@@ -10,8 +10,23 @@ from app.models.user import User
 
 
 class AuthService:
+   
     @staticmethod
     def register(data):
+        return AuthService._create_user(
+            data,
+            role_name="CLIENTE",
+        )
+
+    @staticmethod
+    def create_admin(data):
+        return AuthService._create_user(
+            data,
+            role_name="ADMINISTRADOR",
+        )
+
+    @staticmethod
+    def _create_user(data, role_name):
         first_name = AuthService._validate_name(
             data.get("first_name"),
             "nombre",
@@ -35,18 +50,20 @@ class AuthService:
                 "Ya existe un usuario registrado con ese email."
             )
 
-        customer_role = Role.query.filter(
-            db.func.upper(Role.name) == "CLIENTE",
+        role_name = role_name.upper()
+
+        role = Role.query.filter(
+            db.func.upper(Role.name) == role_name,
             Role.active.is_(True),
         ).first()
 
-        if customer_role is None:
+        if role is None:
             raise RuntimeError(
-                "No se encuentra configurado el rol CLIENTE."
+                f"No se encuentra configurado el rol {role_name}."
             )
 
         user = User(
-            role_id=customer_role.id,
+            role_id=role.id,
             first_name=first_name,
             last_name=last_name,
             email=email,
