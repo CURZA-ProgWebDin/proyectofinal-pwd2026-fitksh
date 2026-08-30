@@ -1,5 +1,7 @@
 import re
 
+from flask_jwt_extended import create_access_token
+
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
@@ -65,6 +67,73 @@ class AuthService:
 
         return user
 
+    @staticmethod
+    def login(data):
+        email = AuthService._validate_email(
+            data.get("email")
+        )
+
+        password = data.get("password")
+
+        if not isinstance(password, str) or not password:
+            raise ValueError(
+                "La contraseña es obligatoria."
+            )
+
+        user = User.query.filter(
+            db.func.lower(User.email) == email
+        ).first()
+
+        if user is None or not user.check_password(password):
+            raise PermissionError(
+                "Email o contraseña incorrectos."
+            )
+
+        if not user.active:
+            raise PermissionError(
+                "El usuario se encuentra desactivado."
+            )
+
+        if user.role is None or not user.role.active:
+            raise PermissionError(
+                "El rol del usuario no se encuentra disponible."
+            )
+
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={
+                "role": user.role.name,
+            },
+        )
+
+        return user, access_token
+
+    @staticmethod
+    def get_authenticated_user(identity):
+        
+        try:
+            user_id = int(identity)
+        except (TypeError, ValueError) as error:
+            raise PermissionError(
+                "La identidad del token no es válida."
+            ) from error
+
+        user = db.session.get(User, user_id)
+
+        if user is None or not user.active:
+            raise PermissionError(
+                "El usuario asociado al token no está disponible."
+            )
+
+        if user.role is None or not user.role.active:
+            raise PermissionError(
+                "El rol del usuario no está disponible."
+            )
+
+        return user
+    
+    # ------------------------------------------------------
+    ## Validation methods
     @staticmethod
     def _validate_name(value, field_name):
         if not isinstance(value, str):
