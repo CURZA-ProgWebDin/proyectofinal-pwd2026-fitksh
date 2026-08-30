@@ -2,7 +2,7 @@ from flask import Flask
 
 from app.config import Config
 from app.extensions import cors, db, migrate
-from app.models import Category, Product
+from app.models import Category, Product, Role, User
 
 from app.routes.category_routes import category_bp
 from app.routes.product_routes import product_bp
