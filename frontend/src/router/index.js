@@ -6,7 +6,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProductsView from '../views/ProductsView.vue'
 import RegisterView from '../views/RegisterView.vue'
-
+import UsersView from '../views/UsersView.vue'
 const routes = [
   {
     path: '/',
@@ -47,6 +47,15 @@ const routes = [
       roles: ['ADMINISTRADOR'],
     },
   },
+  {
+    path: '/users',
+    name: 'users',
+    component: UsersView,
+    meta: {
+      requiresAuth: true,
+      roles: ['ADMINISTRADOR'],
+    },
+  }
 ]
 
 const router = createRouter({

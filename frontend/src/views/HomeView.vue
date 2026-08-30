@@ -96,6 +96,10 @@ onMounted(async () => {
         <RouterLink to="/products">
           Gestionar productos
         </RouterLink>
+
+        <RouterLink to="/users">
+          Gestionar usuarios
+        </RouterLink>
       </div>
     </section>
   </main>

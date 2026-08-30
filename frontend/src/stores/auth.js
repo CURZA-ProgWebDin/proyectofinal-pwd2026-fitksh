@@ -43,6 +43,17 @@ async function initializeAuth() {
   }
 }
 
+async function refreshCurrentUser() {
+  if (!getAccessToken()) {
+    state.user = null
+    return null
+  }
+
+  state.user = await getCurrentUser()
+
+  return state.user
+}
+
 async function login(credentials) {
   const response = await loginUser(credentials)
 
@@ -91,6 +102,7 @@ export function useAuth() {
   return {
     state: readonlyState,
     initializeAuth,
+    refreshCurrentUser,
     login,
     register,
     logout,
