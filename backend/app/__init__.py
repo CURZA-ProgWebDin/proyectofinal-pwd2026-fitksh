@@ -7,6 +7,8 @@ from app.models import Category, Product, Role, User
 from app.routes.category_routes import category_bp
 from app.routes.product_routes import product_bp
 
+from app.routes.auth_routes import auth_bp
+
 from app.routes.health import health_bp
 
 def create_app():
@@ -27,6 +29,7 @@ def create_app():
     )
 
     app.register_blueprint(health_bp)
+    app.register_blueprint(auth_bp)
     app.register_blueprint(category_bp)
     app.register_blueprint(product_bp)
     return app
