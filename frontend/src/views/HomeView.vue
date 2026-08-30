@@ -34,6 +34,9 @@ onMounted(async () => {
       <p :class="connected ? 'success' : 'error'">
         {{ message }}
       </p>
+      <RouterLink to="/categories" class="categories-link">
+        Gestionar categorías
+      </RouterLink>
     </section>
   </main>
 </template>
@@ -63,5 +66,11 @@ onMounted(async () => {
 
 .error {
   color: #b42318;
+}
+
+.categories-link {
+  display: inline-block;
+  margin-top: 16px;
+  color: #2457a7;
 }
 </style>
