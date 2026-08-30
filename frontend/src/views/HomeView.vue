@@ -34,9 +34,17 @@ onMounted(async () => {
       <p :class="connected ? 'success' : 'error'">
         {{ message }}
       </p>
-      <RouterLink to="/categories" class="categories-link">
-        Gestionar categorías
-      </RouterLink>
+
+      <div class="management-links">
+        <RouterLink to="/categories">
+          Gestionar categorías
+        </RouterLink>
+
+        <RouterLink to="/products">
+          Gestionar productos
+        </RouterLink>
+      </div>
+    
     </section>
   </main>
 </template>
@@ -68,9 +76,15 @@ onMounted(async () => {
   color: #b42318;
 }
 
-.categories-link {
-  display: inline-block;
+.management-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-top: 16px;
+}
+
+.management-links a {
   color: #2457a7;
 }
 </style>
