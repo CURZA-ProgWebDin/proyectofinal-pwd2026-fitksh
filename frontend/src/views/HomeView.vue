@@ -1,18 +1,34 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import {
+  onMounted,
+  ref,
+} from 'vue'
+import {
+  RouterLink,
+  useRouter,
+} from 'vue-router'
 
 import api from '../services/api'
+import { useAuth } from '../stores/auth'
+
+const router = useRouter()
+const auth = useAuth()
 
 const message = ref('Comprobando conexión con el backend...')
 const connected = ref(false)
+
+function logout() {
+  auth.logout()
+  router.push('/login')
+}
 
 onMounted(async () => {
   try {
     const response = await api.get('/health')
 
     if (
-      response.data.status === 'ok' &&
-      response.data.database === 'connected'
+      response.data.status === 'ok'
+      && response.data.database === 'connected'
     ) {
       connected.value = true
       message.value = 'Vue, Flask y PostgreSQL están conectados.'
@@ -35,7 +51,44 @@ onMounted(async () => {
         {{ message }}
       </p>
 
-      <div class="management-links">
+      <div
+        v-if="auth.isAuthenticated()"
+        class="session-info"
+      >
+        <p>
+          Sesión iniciada como
+          <strong>
+            {{ auth.state.user.first_name }}
+            {{ auth.state.user.last_name }}
+          </strong>
+        </p>
+
+        <p>
+          Rol: {{ auth.state.user.role.name }}
+        </p>
+
+        <button type="button" @click="logout">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <div v-else class="management-links">
+        <RouterLink to="/login">
+          Iniciar sesión
+        </RouterLink>
+
+        <RouterLink to="/register">
+          Crear cuenta
+        </RouterLink>
+      </div>
+
+      <div
+        v-if="
+          auth.isAuthenticated()
+          && auth.hasAnyRole(['ADMINISTRADOR'])
+        "
+        class="management-links"
+      >
         <RouterLink to="/categories">
           Gestionar categorías
         </RouterLink>
@@ -44,7 +97,6 @@ onMounted(async () => {
           Gestionar productos
         </RouterLink>
       </div>
-    
     </section>
   </main>
 </template>
@@ -84,7 +136,19 @@ onMounted(async () => {
   margin-top: 16px;
 }
 
-.management-links a {
-  color: #2457a7;
+.session-info {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+
+.session-info button {
+  padding: 9px 14px;
+  color: white;
+  cursor: pointer;
+  background-color: #b42318;
+  border: 0;
+  border-radius: 4px;
 }
 </style>

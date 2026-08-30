@@ -20,3 +20,80 @@ select,
 textarea {
   font: inherit;
 }
+
+a {
+  color: #2457a7;
+}
+
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 32px;
+  background-color: white;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.auth-card h1 {
+  margin-top: 0;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.auth-field {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #bbbbbb;
+  border-radius: 4px;
+}
+
+.auth-field small {
+  color: #666666;
+}
+
+.auth-form button {
+  padding: 10px 16px;
+  color: white;
+  cursor: pointer;
+  background-color: #2457a7;
+  border: 0;
+  border-radius: 4px;
+}
+
+.auth-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auth-error,
+.auth-success {
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.auth-error {
+  color: #b42318;
+  background-color: #fee4e2;
+}
+
+.auth-success {
+  color: #18794e;
+  background-color: #dcfae6;
+}
