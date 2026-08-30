@@ -10,7 +10,7 @@ from app.routes.auth_routes import auth_bp
 from app.routes.category_routes import category_bp
 from app.routes.health import health_bp
 from app.routes.product_routes import product_bp
-
+from app.routes.user_routes import role_bp, user_bp
 
 
 
@@ -41,6 +41,8 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(category_bp)
     app.register_blueprint(product_bp)
-
+    app.register_blueprint(user_bp)
+    app.register_blueprint(role_bp)
+    
     app.cli.add_command(create_admin_command)
     return app
