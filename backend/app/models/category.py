@@ -50,7 +50,12 @@ class Category(db.Model):
         onupdate=lambda: datetime.now(timezone.utc),
         server_default=db.func.now(),
     )
-
+    
+    products = db.relationship(
+        "Product",
+        back_populates="category",
+    )
+    
     def to_dict(self):
         return {
             "id": self.id,
