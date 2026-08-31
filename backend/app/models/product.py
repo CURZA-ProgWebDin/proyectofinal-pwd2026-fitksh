@@ -98,6 +98,13 @@ class Product(db.Model):
         "Category",
         back_populates="products",
     )
+    
+    
+    cart_items = db.relationship(
+        "CartItem",
+        back_populates="product",
+        passive_deletes=True,
+    )
 
     __table_args__ = (
         db.CheckConstraint(

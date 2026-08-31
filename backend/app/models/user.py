@@ -82,6 +82,14 @@ class User(db.Model):
         "Role",
         back_populates="users",
     )
+    
+    cart = db.relationship(
+        "Cart",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

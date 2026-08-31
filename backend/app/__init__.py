@@ -4,7 +4,14 @@ from app.commands import create_admin_command
 
 from app.config import Config
 from app.extensions import cors, db, jwt, migrate
-from app.models import Category, Product, Role, User
+from app.models import (
+    Cart,
+    CartItem,
+    Category,
+    Product,
+    Role,
+    User,
+)
 
 from app.routes.auth_routes import auth_bp
 from app.routes.category_routes import category_bp
