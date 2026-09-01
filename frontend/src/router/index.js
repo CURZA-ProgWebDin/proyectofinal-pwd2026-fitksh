@@ -7,6 +7,9 @@ import LoginView from '../views/LoginView.vue'
 import ProductsView from '../views/ProductsView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import UsersView from '../views/UsersView.vue'
+import CatalogView from '../views/CatalogView.vue'
+import CartView from '../views/CartView.vue'
+
 const routes = [
   {
     path: '/',
@@ -27,6 +30,24 @@ const routes = [
     component: RegisterView,
     meta: {
       guestOnly: true,
+    },
+  },
+  {
+    path: '/catalog',
+    name: 'catalog',
+    component: CatalogView,
+    meta: {
+      requiresAuth: true,
+      roles: ['CLIENTE'],
+    },
+  },
+    {
+    path: '/cart',
+    name: 'cart',
+    component: CartView,
+    meta: {
+      requiresAuth: true,
+      roles: ['CLIENTE'],
     },
   },
   {

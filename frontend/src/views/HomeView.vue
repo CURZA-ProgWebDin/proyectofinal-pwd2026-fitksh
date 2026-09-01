@@ -101,6 +101,20 @@ onMounted(async () => {
           Gestionar usuarios
         </RouterLink>
       </div>
+            <div
+        v-if="
+          auth.isAuthenticated()
+          && auth.hasAnyRole(['CLIENTE'])
+        "
+        class="management-links"
+      >
+        <RouterLink to="/catalog">
+          Ver catálogo
+        </RouterLink>
+        <RouterLink to="/cart">
+          Ver carrito
+        </RouterLink>
+      </div>
     </section>
   </main>
 </template>
