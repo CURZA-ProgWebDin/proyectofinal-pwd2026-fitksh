@@ -118,7 +118,6 @@ onMounted(async () => {
     </section>
   </main>
 </template>
-
 <style scoped>
 .home {
   display: flex;
