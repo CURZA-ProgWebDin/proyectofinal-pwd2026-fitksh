@@ -105,6 +105,11 @@ class Product(db.Model):
         back_populates="product",
         passive_deletes=True,
     )
+    order_details = db.relationship(
+        "OrderDetail",
+        back_populates="product",
+        passive_deletes=True,
+    )
 
     __table_args__ = (
         db.CheckConstraint(
