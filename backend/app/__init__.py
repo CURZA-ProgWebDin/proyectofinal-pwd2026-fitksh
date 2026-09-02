@@ -15,6 +15,10 @@ from app.models import (
     Role,
     User,
 )
+from app.routes.order_routes import (
+    order_bp,
+    order_status_bp,
+)
 
 from app.routes.auth_routes import auth_bp
 from app.routes.category_routes import category_bp
@@ -54,6 +58,8 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(role_bp)
     app.register_blueprint(cart_bp)
-
+    app.register_blueprint(order_bp)
+    app.register_blueprint(order_status_bp)
+    
     app.cli.add_command(create_admin_command)
     return app
