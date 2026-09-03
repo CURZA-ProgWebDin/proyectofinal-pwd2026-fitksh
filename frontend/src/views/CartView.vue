@@ -14,6 +14,8 @@ import {
   updateCartItem,
 } from '../services/cartService'
 
+import { createOrder } from '../services/orderService'
+
 const cart = ref(null)
 const quantities = reactive({})
 
@@ -23,6 +25,10 @@ const clearing = ref(false)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+
+const notes = ref('')
+const creatingOrder = ref(false)
+const createdOrder = ref(null)
 
 const hasItems = computed(() => {
   return cart.value?.items?.length > 0
@@ -174,6 +180,51 @@ async function emptyCart() {
   }
 }
 
+async function confirmOrder() {
+  clearMessages()
+
+  if (!hasItems.value) {
+    errorMessage.value = 'El carrito está vacío.'
+    return
+  }
+
+  if (
+    !window.confirm(
+      (
+        `¿Deseás crear el pedido por `
+        + `${formatPrice(cart.value.total)}?`
+      ),
+    )
+  ) {
+    return
+  }
+
+  creatingOrder.value = true
+
+  try {
+    const order = await createOrder(notes.value)
+
+    createdOrder.value = order
+    notes.value = ''
+
+    setCart({
+      ...cart.value,
+      items: [],
+      item_count: 0,
+      total_quantity: 0,
+      total: 0,
+    })
+
+    successMessage.value = (
+      `Pedido #${order.id} creado correctamente.`
+    )
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error)
+  } finally {
+    creatingOrder.value = false
+  }
+}
+
 onMounted(loadCart)
 </script>
 
@@ -217,12 +268,30 @@ onMounted(loadCart)
       class="empty-cart"
     >
       <h2>Tu carrito está vacío</h2>
+      <div
+        v-if="createdOrder"
+        class="created-order"
+        >
+        <p>
+            Se creó el pedido
+            <strong>#{{ createdOrder.id }}</strong>.
+        </p>
 
+        <p>
+            Estado: {{ createdOrder.status.name }}
+        </p>
+
+        <p>
+            Total: {{ formatPrice(createdOrder.total) }}
+        </p>
+        <RouterLink to="/my-orders">
+        Ver mis pedidos
+        </RouterLink>
+    </div>
       <p>
         Agregá productos desde el catálogo para comenzar
         una compra.
       </p>
-
       <RouterLink to="/catalog">
         Ir al catálogo
       </RouterLink>
@@ -353,6 +422,33 @@ onMounted(loadCart)
           @click="emptyCart"
         >
           {{ clearing ? 'Vaciando...' : 'Vaciar carrito' }}
+        </button>
+      </section>
+      <section class="checkout-card">
+        <div>
+            <label for="order-notes">
+            Observaciones del pedido
+            </label>
+
+            <textarea
+            id="order-notes"
+            v-model="notes"
+            rows="3"
+            placeholder="Información adicional para el pedido"
+            :disabled="creatingOrder"
+            />
+        </div>
+
+        <button
+            type="button"
+            :disabled="creatingOrder"
+            @click="confirmOrder"
+        >
+            {{
+            creatingOrder
+                ? 'Creando pedido...'
+                : 'Confirmar pedido'
+            }}
         </button>
       </section>
     </template>
@@ -521,6 +617,50 @@ button:disabled {
   font-size: 1.3rem;
   color: #18794e;
 }
+.checkout-card {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 24px;
+  background-color: white;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+}
+
+.checkout-card div {
+  display: grid;
+  gap: 8px;
+}
+
+.checkout-card label {
+  font-weight: 600;
+}
+
+.checkout-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font: inherit;
+  resize: vertical;
+  border: 1px solid #bbbbbb;
+  border-radius: 4px;
+}
+
+.checkout-card button {
+  justify-self: end;
+}
+
+.created-order {
+  margin-bottom: 16px;
+  padding: 16px;
+  color: #18794e;
+  background-color: #dcfae6;
+  border-radius: 6px;
+}
+
+.created-order p {
+  margin: 4px 0;
+}
 
 @media (max-width: 700px) {
   .page-header {
@@ -532,5 +672,8 @@ button:disabled {
     align-items: stretch;
     flex-direction: column;
   }
+  .checkout-card button {
+  width: 100%;
+    }
 }
 </style>

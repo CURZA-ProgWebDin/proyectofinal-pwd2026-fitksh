@@ -114,6 +114,9 @@ onMounted(async () => {
         <RouterLink to="/cart">
           Ver carrito
         </RouterLink>
+        <RouterLink to="/my-orders">
+        Mis pedidos
+      </RouterLink>
       </div>
     </section>
   </main>

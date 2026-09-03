@@ -9,6 +9,8 @@ import RegisterView from '../views/RegisterView.vue'
 import UsersView from '../views/UsersView.vue'
 import CatalogView from '../views/CatalogView.vue'
 import CartView from '../views/CartView.vue'
+import MyOrdersView from '../views/MyOrdersView.vue'
+
 
 const routes = [
   {
@@ -49,6 +51,15 @@ const routes = [
       requiresAuth: true,
       roles: ['CLIENTE'],
     },
+  },
+  {
+  path: '/my-orders',
+  name: 'my-orders',
+  component: MyOrdersView,
+  meta: {
+    requiresAuth: true,
+    roles: ['CLIENTE'],
+  },
   },
   {
     path: '/categories',
