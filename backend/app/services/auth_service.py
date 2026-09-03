@@ -1,13 +1,18 @@
 import re
 
-from flask_jwt_extended import create_access_token
-
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+)
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.models.role import Role
 from app.models.user import User
+from app.models.refresh_token import RefreshToken
 
+from datetime import datetime, timezone
 
 class AuthService:
    
@@ -122,9 +127,86 @@ class AuthService:
                 "role": user.role.name,
             },
         )
+        
+        refresh_token = create_refresh_token(
+            identity=str(user.id),
+        )
 
-        return user, access_token
+        refresh_token_data = decode_token(refresh_token)
 
+        stored_refresh_token = RefreshToken(
+            user_id=user.id,
+            token_identifier=refresh_token_data["jti"],
+            expires_at=datetime.fromtimestamp(
+                refresh_token_data["exp"],
+                tz=timezone.utc,
+            ),
+        )
+
+        db.session.add(stored_refresh_token)
+        db.session.commit()
+
+        return user, access_token, refresh_token
+    
+    @staticmethod
+    def refresh_access_token(identity, token_identifier):
+        user = AuthService.get_authenticated_user(identity)
+
+        stored_refresh_token = RefreshToken.query.filter(
+            RefreshToken.user_id == user.id,
+            RefreshToken.token_identifier == token_identifier,
+        ).first()
+
+        if stored_refresh_token is None:
+            raise PermissionError(
+                "El refresh token no se encuentra registrado."
+            )
+
+        if stored_refresh_token.revoked_at is not None:
+            raise PermissionError(
+                "El refresh token fue revocado."
+            )
+
+        if stored_refresh_token.expires_at <= datetime.now(timezone.utc):
+            raise PermissionError(
+                "El refresh token se encuentra vencido."
+            )
+
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={
+                "role": user.role.name,
+            },
+        )
+
+        return access_token
+
+    @staticmethod
+    def revoke_refresh_token(identity, token_identifier):
+        try:
+            user_id = int(identity)
+        except (TypeError, ValueError) as error:
+            raise PermissionError(
+                "La identidad del token no es válida."
+            ) from error
+
+        stored_refresh_token = RefreshToken.query.filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.token_identifier == token_identifier,
+        ).first()
+
+        if stored_refresh_token is None:
+            raise PermissionError(
+                "El refresh token no se encuentra registrado."
+            )
+
+        if stored_refresh_token.revoked_at is None:
+            stored_refresh_token.revoked_at = datetime.now(
+                timezone.utc
+            )
+
+            db.session.commit()
+            
     @staticmethod
     def get_authenticated_user(identity):
         
