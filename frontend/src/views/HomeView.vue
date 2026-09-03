@@ -17,9 +17,9 @@ const auth = useAuth()
 const message = ref('Comprobando conexión con el backend...')
 const connected = ref(false)
 
-function logout() {
-  auth.logout()
-  router.push('/login')
+async function logout() {
+  await auth.logout()
+  await router.push('/login')
 }
 
 onMounted(async () => {

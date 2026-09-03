@@ -6,12 +6,16 @@ import {
 import {
   getCurrentUser,
   loginUser,
+  logoutUser,
   registerUser,
 } from '../services/authService'
+
 import {
+  clearAuthTokens,
   getAccessToken,
-  removeAccessToken,
+  getRefreshToken,
   saveAccessToken,
+  saveRefreshToken,
 } from '../services/authStorage'
 
 const state = reactive({
@@ -27,8 +31,12 @@ async function initializeAuth() {
   }
 
   const accessToken = getAccessToken()
+  const refreshToken = getRefreshToken()
 
-  if (!accessToken) {
+  if (
+    !accessToken
+    && !refreshToken
+  ) {
     state.initialized = true
     return
   }
@@ -36,7 +44,7 @@ async function initializeAuth() {
   try {
     state.user = await getCurrentUser()
   } catch (error) {
-    removeAccessToken()
+    clearAuthTokens()
     state.user = null
   } finally {
     state.initialized = true
@@ -44,7 +52,10 @@ async function initializeAuth() {
 }
 
 async function refreshCurrentUser() {
-  if (!getAccessToken()) {
+  if (
+    !getAccessToken()
+    && !getRefreshToken()
+  ) {
     state.user = null
     return null
   }
@@ -58,6 +69,7 @@ async function login(credentials) {
   const response = await loginUser(credentials)
 
   saveAccessToken(response.access_token)
+  saveRefreshToken(response.refresh_token)
 
   state.user = response.user
   state.initialized = true
@@ -69,15 +81,33 @@ async function register(userData) {
   return registerUser(userData)
 }
 
-function logout() {
-  removeAccessToken()
-  state.user = null
-  state.initialized = true
+async function logout() {
+  const refreshToken = getRefreshToken()
+
+  try {
+    if (refreshToken) {
+      await logoutUser(refreshToken)
+    }
+  } catch (error) {
+    console.error(
+      'No fue posible revocar el refresh token.',
+      error,
+    )
+  } finally {
+    clearAuthTokens()
+    state.user = null
+    state.initialized = true
+  }
 }
 
 function isAuthenticated() {
-  return Boolean(
+  const hasToken = Boolean(
     getAccessToken()
+    || getRefreshToken()
+  )
+
+  return Boolean(
+    hasToken
     && state.user
   )
 }

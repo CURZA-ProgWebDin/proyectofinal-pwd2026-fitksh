@@ -22,3 +22,17 @@ export async function getCurrentUser() {
   const response = await api.get('/auth/me')
   return response.data.data
 }
+
+export async function logoutUser(refreshToken) {
+  const response = await api.post(
+    '/auth/logout',
+    null,
+    {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    },
+  )
+
+  return response.data
+}
