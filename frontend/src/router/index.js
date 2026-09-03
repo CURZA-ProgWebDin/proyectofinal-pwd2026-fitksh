@@ -10,7 +10,7 @@ import UsersView from '../views/UsersView.vue'
 import CatalogView from '../views/CatalogView.vue'
 import CartView from '../views/CartView.vue'
 import MyOrdersView from '../views/MyOrdersView.vue'
-
+import AdminOrdersView from '../views/AdminOrdersView.vue'
 
 const routes = [
   {
@@ -87,6 +87,15 @@ const routes = [
       requiresAuth: true,
       roles: ['ADMINISTRADOR'],
     },
+  },
+  {
+  path: '/admin/orders',
+  name: 'admin-orders',
+  component: AdminOrdersView,
+  meta: {
+    requiresAuth: true,
+    roles: ['ADMINISTRADOR'],
+  },
   }
 ]
 

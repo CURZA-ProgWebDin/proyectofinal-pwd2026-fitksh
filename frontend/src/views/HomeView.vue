@@ -100,6 +100,11 @@ onMounted(async () => {
         <RouterLink to="/users">
           Gestionar usuarios
         </RouterLink>
+
+        <RouterLink to="/admin/orders">
+          Gestionar pedidos
+        </RouterLink>
+
       </div>
             <div
         v-if="
