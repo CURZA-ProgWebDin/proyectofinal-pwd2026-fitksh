@@ -90,9 +90,17 @@ class User(db.Model):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    
     orders = db.relationship(
         "Order",
         back_populates="user",
+        passive_deletes=True,
+    )
+    
+    refresh_tokens = db.relationship(
+        "RefreshToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
         passive_deletes=True,
     )
 
