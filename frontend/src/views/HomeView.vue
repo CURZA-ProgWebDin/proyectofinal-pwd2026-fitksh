@@ -104,9 +104,9 @@ onMounted(async () => {
         <RouterLink to="/admin/orders">
           Gestionar pedidos
         </RouterLink>
-
       </div>
-            <div
+
+      <div
         v-if="
           auth.isAuthenticated()
           && auth.hasAnyRole(['CLIENTE'])
@@ -116,16 +116,19 @@ onMounted(async () => {
         <RouterLink to="/catalog">
           Ver catálogo
         </RouterLink>
+
         <RouterLink to="/cart">
           Ver carrito
         </RouterLink>
+
         <RouterLink to="/my-orders">
-        Mis pedidos
-      </RouterLink>
+          Mis pedidos
+        </RouterLink>
       </div>
     </section>
   </main>
 </template>
+
 <style scoped>
 .home {
   display: flex;

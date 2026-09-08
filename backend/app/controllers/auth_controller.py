@@ -1,5 +1,4 @@
 from flask import jsonify, request
-
 from flask_jwt_extended import (
     get_jwt,
     get_jwt_identity,
@@ -102,7 +101,8 @@ def get_current_user():
             "data": user.to_dict(),
         }
     ), 200
-    
+
+
 @jwt_required(refresh=True)
 def refresh_access_token():
     identity = get_jwt_identity()
@@ -127,7 +127,8 @@ def refresh_access_token():
             "token_type": "Bearer",
         }
     ), 200
-    
+
+
 @jwt_required(refresh=True)
 def logout():
     identity = get_jwt_identity()

@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timezone
 
 from flask_jwt_extended import (
     create_access_token,
@@ -8,11 +9,10 @@ from flask_jwt_extended import (
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
+from app.models.refresh_token import RefreshToken
 from app.models.role import Role
 from app.models.user import User
-from app.models.refresh_token import RefreshToken
 
-from datetime import datetime, timezone
 
 class AuthService:
    
@@ -121,12 +121,7 @@ class AuthService:
                 "El rol del usuario no se encuentra disponible."
             )
 
-        access_token = create_access_token(
-            identity=str(user.id),
-            additional_claims={
-                "role": user.role.name,
-            },
-        )
+        access_token = AuthService._create_access_token(user)
         
         refresh_token = create_refresh_token(
             identity=str(user.id),
@@ -172,12 +167,7 @@ class AuthService:
                 "El refresh token se encuentra vencido."
             )
 
-        access_token = create_access_token(
-            identity=str(user.id),
-            additional_claims={
-                "role": user.role.name,
-            },
-        )
+        access_token = AuthService._create_access_token(user)
 
         return access_token
 
@@ -231,6 +221,15 @@ class AuthService:
 
         return user
     
+    @staticmethod
+    def _create_access_token(user):
+        return create_access_token(
+            identity=str(user.id),
+            additional_claims={
+                "role": user.role.name,
+            },
+        )
+
     # ------------------------------------------------------
     ## Validation methods
     @staticmethod

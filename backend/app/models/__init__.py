@@ -5,9 +5,9 @@ from app.models.order import Order
 from app.models.order_detail import OrderDetail
 from app.models.order_status import OrderStatus
 from app.models.product import Product
+from app.models.refresh_token import RefreshToken
 from app.models.role import Role
 from app.models.user import User
-from app.models.refresh_token import RefreshToken
 
 
 __all__ = [
@@ -18,7 +18,7 @@ __all__ = [
     "OrderDetail",
     "OrderStatus",
     "Product",
+    "RefreshToken",
     "Role",
     "User",
-    "RefreshToken",
 ]

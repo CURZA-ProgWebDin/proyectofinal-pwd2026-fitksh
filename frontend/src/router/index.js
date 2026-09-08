@@ -1,16 +1,19 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+} from 'vue-router'
 
 import { useAuth } from '../stores/auth'
+import AdminOrdersView from '../views/AdminOrdersView.vue'
+import CartView from '../views/CartView.vue'
+import CatalogView from '../views/CatalogView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import MyOrdersView from '../views/MyOrdersView.vue'
 import ProductsView from '../views/ProductsView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import UsersView from '../views/UsersView.vue'
-import CatalogView from '../views/CatalogView.vue'
-import CartView from '../views/CartView.vue'
-import MyOrdersView from '../views/MyOrdersView.vue'
-import AdminOrdersView from '../views/AdminOrdersView.vue'
 
 const routes = [
   {
@@ -43,7 +46,7 @@ const routes = [
       roles: ['CLIENTE'],
     },
   },
-    {
+  {
     path: '/cart',
     name: 'cart',
     component: CartView,
@@ -53,13 +56,13 @@ const routes = [
     },
   },
   {
-  path: '/my-orders',
-  name: 'my-orders',
-  component: MyOrdersView,
-  meta: {
-    requiresAuth: true,
-    roles: ['CLIENTE'],
-  },
+    path: '/my-orders',
+    name: 'my-orders',
+    component: MyOrdersView,
+    meta: {
+      requiresAuth: true,
+      roles: ['CLIENTE'],
+    },
   },
   {
     path: '/categories',
@@ -89,14 +92,14 @@ const routes = [
     },
   },
   {
-  path: '/admin/orders',
-  name: 'admin-orders',
-  component: AdminOrdersView,
-  meta: {
-    requiresAuth: true,
-    roles: ['ADMINISTRADOR'],
+    path: '/admin/orders',
+    name: 'admin-orders',
+    component: AdminOrdersView,
+    meta: {
+      requiresAuth: true,
+      roles: ['ADMINISTRADOR'],
+    },
   },
-  }
 ]
 
 const router = createRouter({

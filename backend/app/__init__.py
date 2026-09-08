@@ -12,6 +12,7 @@ from app.models import (
     OrderDetail,
     OrderStatus,
     Product,
+    RefreshToken,
     Role,
     User,
 )

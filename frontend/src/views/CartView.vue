@@ -264,38 +264,42 @@ onMounted(loadCart)
     </p>
 
     <section
-      v-else-if="!hasItems"
-      class="empty-cart"
+    v-else-if="!hasItems"
+    class="empty-cart"
     >
-      <h2>Tu carrito está vacío</h2>
-      <div
-        v-if="createdOrder"
-        class="created-order"
-        >
-        <p>
-            Se creó el pedido
-            <strong>#{{ createdOrder.id }}</strong>.
-        </p>
+    <h2>Tu carrito está vacío</h2>
 
-        <p>
-            Estado: {{ createdOrder.status.name }}
-        </p>
-
-        <p>
-            Total: {{ formatPrice(createdOrder.total) }}
-        </p>
-        <RouterLink to="/my-orders">
-        Ver mis pedidos
-        </RouterLink>
-    </div>
+    <div
+      v-if="createdOrder"
+      class="created-order"
+    >
       <p>
-        Agregá productos desde el catálogo para comenzar
-        una compra.
+        Se creó el pedido
+        <strong>#{{ createdOrder.id }}</strong>.
       </p>
-      <RouterLink to="/catalog">
-        Ir al catálogo
+
+      <p>
+        Estado: {{ createdOrder.status.name }}
+      </p>
+
+      <p>
+        Total: {{ formatPrice(createdOrder.total) }}
+      </p>
+
+      <RouterLink to="/my-orders">
+        Ver mis pedidos
       </RouterLink>
-    </section>
+    </div>
+
+    <p>
+      Agregá productos desde el catálogo para comenzar
+      una compra.
+    </p>
+
+    <RouterLink to="/catalog">
+      Ir al catálogo
+    </RouterLink>
+  </section>
 
     <template v-else>
       <section class="cart-card">
@@ -424,33 +428,35 @@ onMounted(loadCart)
           {{ clearing ? 'Vaciando...' : 'Vaciar carrito' }}
         </button>
       </section>
+
       <section class="checkout-card">
         <div>
-            <label for="order-notes">
+          <label for="order-notes">
             Observaciones del pedido
-            </label>
+          </label>
 
-            <textarea
+          <textarea
             id="order-notes"
             v-model="notes"
             rows="3"
             placeholder="Información adicional para el pedido"
             :disabled="creatingOrder"
-            />
+          />
         </div>
 
         <button
-            type="button"
-            :disabled="creatingOrder"
-            @click="confirmOrder"
+          type="button"
+          :disabled="creatingOrder"
+          @click="confirmOrder"
         >
-            {{
+          {{
             creatingOrder
-                ? 'Creando pedido...'
-                : 'Confirmar pedido'
-            }}
+              ? 'Creando pedido...'
+              : 'Confirmar pedido'
+          }}
         </button>
       </section>
+
     </template>
   </main>
 </template>
@@ -617,6 +623,7 @@ button:disabled {
   font-size: 1.3rem;
   color: #18794e;
 }
+
 .checkout-card {
   display: grid;
   gap: 16px;
@@ -672,8 +679,10 @@ button:disabled {
     align-items: stretch;
     flex-direction: column;
   }
+
   .checkout-card button {
-  width: 100%;
-    }
+    width: 100%;
+  }
 }
+
 </style>
