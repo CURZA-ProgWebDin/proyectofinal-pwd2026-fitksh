@@ -12,6 +12,12 @@ import {
   updateOrderStatus,
 } from '../services/orderService'
 
+import {
+  formatDate,
+  formatPrice,
+  formatStatus,
+} from '../utils/formatters'
+
 const orders = ref([])
 const statuses = ref([])
 const selectedStatuses = reactive({})
@@ -41,28 +47,6 @@ const allowedTransitions = {
   ],
   ENTREGADO: [],
   CANCELADO: [],
-}
-
-const priceFormatter = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-})
-
-const dateFormatter = new Intl.DateTimeFormat('es-AR', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
-
-function formatPrice(price) {
-  return priceFormatter.format(price)
-}
-
-function formatDate(date) {
-  return dateFormatter.format(new Date(date))
-}
-
-function formatStatus(statusName) {
-  return statusName.replaceAll('_', ' ')
 }
 
 function getStatusClass(statusName) {

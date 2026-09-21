@@ -13,6 +13,8 @@ import {
 } from '../services/cartService'
 import { getProducts } from '../services/productService'
 
+import { formatPrice } from '../utils/formatters'
+
 const products = ref([])
 const cart = ref(null)
 
@@ -29,15 +31,6 @@ const activeProducts = computed(() => {
     (product) => product.active,
   )
 })
-
-const priceFormatter = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-})
-
-function formatPrice(price) {
-  return priceFormatter.format(price)
-}
 
 function clearMessages() {
   errorMessage.value = ''

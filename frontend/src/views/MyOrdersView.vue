@@ -10,6 +10,12 @@ import {
   getOrders,
 } from '../services/orderService'
 
+import {
+  formatDate,
+  formatPrice,
+  formatStatus,
+} from '../utils/formatters'
+
 const orders = ref([])
 const loading = ref(false)
 const cancellingId = ref(null)
@@ -17,28 +23,6 @@ const expandedOrderId = ref(null)
 
 const errorMessage = ref('')
 const successMessage = ref('')
-
-const priceFormatter = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-})
-
-const dateFormatter = new Intl.DateTimeFormat('es-AR', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
-
-function formatPrice(price) {
-  return priceFormatter.format(price)
-}
-
-function formatDate(date) {
-  return dateFormatter.format(new Date(date))
-}
-
-function formatStatus(statusName) {
-  return statusName.replaceAll('_', ' ')
-}
 
 function getStatusClass(statusName) {
   return {

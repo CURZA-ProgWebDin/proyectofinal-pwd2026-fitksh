@@ -15,6 +15,8 @@ import {
   updateProduct,
 } from '../services/productService'
 
+import { formatPrice } from '../utils/formatters'
+
 const products = ref([])
 const categories = ref([])
 
@@ -51,15 +53,6 @@ const availableCategories = computed(() => {
     )
   })
 })
-
-const priceFormatter = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-})
-
-function formatPrice(price) {
-  return priceFormatter.format(price)
-}
 
 function clearMessages() {
   errorMessage.value = ''
