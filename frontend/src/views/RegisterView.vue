@@ -12,6 +12,8 @@ import { useAuth } from '../stores/auth'
 
 import { getApiErrorMessage } from '../utils/apiErrors'
 
+import { getUserFormError } from '../utils/userValidation'
+
 const router = useRouter()
 const auth = useAuth()
 
@@ -27,7 +29,16 @@ const submitting = ref(false)
 const errorMessage = ref('')
 
 async function submitRegistration() {
-  errorMessage.value = ''
+
+  if (submitting.value) {
+    return
+  }
+
+  errorMessage.value = getUserFormError(form)
+
+  if (errorMessage.value) {
+    return
+  }
 
   if (form.password !== form.password_confirmation) {
     errorMessage.value = 'Las contraseñas no coinciden.'

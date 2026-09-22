@@ -35,7 +35,13 @@ const registrationMessage = computed(() => {
 })
 
 async function submitLogin() {
+
+  if (submitting.value) {
+    return
+  }
+
   errorMessage.value = ''
+
   submitting.value = true
 
   try {
@@ -55,15 +61,15 @@ async function submitLogin() {
       : '/'
 
     await router.push(redirect)
-    } catch (error) {
-      errorMessage.value = getApiErrorMessage(
-        error,
-        'No fue posible iniciar sesión.',
-      )
-    } finally {
-      submitting.value = false
-    }
-    }
+  } catch (error) {
+    errorMessage.value = getApiErrorMessage(
+      error,
+      'No fue posible iniciar sesión.',
+    )
+  } finally {
+    submitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -87,6 +93,7 @@ async function submitLogin() {
             id="login-email"
             v-model.trim="form.email"
             type="email"
+            maxlength="150"
             autocomplete="email"
             required
           >

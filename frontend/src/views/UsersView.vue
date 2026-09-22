@@ -18,6 +18,8 @@ import {
 
 import { getApiErrorMessage } from '../utils/apiErrors'
 
+import { getUserFormError } from '../utils/userValidation'
+
 const auth = useAuth()
 
 const users = ref([])
@@ -60,44 +62,14 @@ function resetForm() {
   editingId.value = null
 }
 
-function validatePassword(password) {
-  if (password.length < 8) {
-    errorMessage.value = (
-      'La contraseña debe tener al menos 8 caracteres.'
-    )
-    return false
-  }
-
-  if (![...password].some((character) => /[a-zA-Z]/.test(character))) {
-    errorMessage.value = (
-      'La contraseña debe contener al menos una letra.'
-    )
-    return false
-  }
-
-  if (![...password].some((character) => /\d/.test(character))) {
-    errorMessage.value = (
-      'La contraseña debe contener al menos un número.'
-    )
-    return false
-  }
-
-  return true
-}
 
 function validateForm() {
-  if (!form.first_name.trim()) {
-    errorMessage.value = 'El nombre es obligatorio.'
-    return false
-  }
+  errorMessage.value = getUserFormError(
+    form,
+    !isEditing.value,
+  )
 
-  if (!form.last_name.trim()) {
-    errorMessage.value = 'El apellido es obligatorio.'
-    return false
-  }
-
-  if (!form.email.trim()) {
-    errorMessage.value = 'El email es obligatorio.'
+  if (errorMessage.value) {
     return false
   }
 
@@ -105,20 +77,6 @@ function validateForm() {
 
   if (!Number.isInteger(roleId) || roleId <= 0) {
     errorMessage.value = 'Debe seleccionar un rol.'
-    return false
-  }
-
-  if (!isEditing.value && !form.password) {
-    errorMessage.value = (
-      'La contraseña es obligatoria para crear un usuario.'
-    )
-    return false
-  }
-
-  if (
-    form.password
-    && !validatePassword(form.password)
-  ) {
     return false
   }
 
@@ -139,6 +97,9 @@ async function loadData() {
 }
 
 async function submitForm() {
+  if (saving.value) {
+    return
+  }
   clearMessages()
 
   if (!validateForm()) {
