@@ -1,5 +1,33 @@
-# Vue 3 + Vite
+# Punto Mayorista — Frontend
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Interfaz de Punto Mayorista desarrollada con Vue 3.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+Utiliza Vue Router para la navegación y Axios para comunicarse con la API REST de Flask.
+
+Permite registrarse, iniciar sesión, consultar el catálogo, gestionar el carrito y consultar pedidos. Los administradores también pueden gestionar categorías, productos, usuarios y pedidos.
+
+## Desarrollo local
+
+Se requieren las dependencias instaladas y un archivo `.env` configurado a partir de `.env.example`.
+
+Desde la carpeta `frontend`:
+
+```powershell
+npm run dev
+```
+
+Para utilizar las funciones de la aplicación, Flask y PostgreSQL deben estar en ejecución.
+
+## Compilación
+
+Desde la carpeta `frontend`:
+
+```powershell
+npm run build
+```
+
+Los archivos compilados se generan en `dist/`.
+
+## Documentación relacionada
+
+- [Consigna del trabajo y diagrama de base de datos](../readme.md).

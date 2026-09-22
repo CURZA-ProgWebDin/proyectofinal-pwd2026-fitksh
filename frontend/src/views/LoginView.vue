@@ -55,15 +55,15 @@ async function submitLogin() {
       : '/'
 
     await router.push(redirect)
-  } catch (error) {
-    errorMessage.value = getApiErrorMessage(
-    error,
-    'No fue posible iniciar sesión.',
-)
-  } finally {
-    submitting.value = false
-  }
-}
+    } catch (error) {
+      errorMessage.value = getApiErrorMessage(
+        error,
+        'No fue posible iniciar sesión.',
+      )
+    } finally {
+      submitting.value = false
+    }
+    }
 </script>
 
 <template>
