@@ -12,6 +12,8 @@ import {
 
 import { useAuth } from '../stores/auth'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const route = useRoute()
 const router = useRouter()
 const auth = useAuth()
@@ -31,14 +33,6 @@ const registrationMessage = computed(() => {
 
   return ''
 })
-
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || error.response?.data?.msg
-    || 'No fue posible iniciar sesión.'
-  )
-}
 
 async function submitLogin() {
   errorMessage.value = ''
@@ -62,7 +56,10 @@ async function submitLogin() {
 
     await router.push(redirect)
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(
+    error,
+    'No fue posible iniciar sesión.',
+)
   } finally {
     submitting.value = false
   }

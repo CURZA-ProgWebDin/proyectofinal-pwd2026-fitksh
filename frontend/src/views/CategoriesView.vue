@@ -14,6 +14,8 @@ import {
   updateCategory,
 } from '../services/categoryService'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const categories = ref([])
 const loading = ref(false)
 const saving = ref(false)
@@ -35,13 +37,6 @@ function clearMessages() {
   successMessage.value = ''
 }
 
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
-}
-
 function resetForm() {
   form.name = ''
   form.description = ''
@@ -54,7 +49,7 @@ async function loadCategories() {
   try {
     categories.value = await getCategories()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -87,7 +82,7 @@ async function submitForm() {
     resetForm()
     await loadCategories()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     saving.value = false
   }
@@ -138,7 +133,7 @@ async function changeCategoryStatus(category) {
 
     await loadCategories()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     changingId.value = null
   }

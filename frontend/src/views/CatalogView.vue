@@ -15,6 +15,8 @@ import { getProducts } from '../services/productService'
 
 import { formatPrice } from '../utils/formatters'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const products = ref([])
 const cart = ref(null)
 
@@ -37,14 +39,6 @@ function clearMessages() {
   successMessage.value = ''
 }
 
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || error.response?.data?.msg
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
-}
-
 async function loadData() {
   loading.value = true
   clearMessages()
@@ -65,7 +59,7 @@ async function loadData() {
       quantities[product.id] = 1
     }
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -104,7 +98,7 @@ async function addProduct(product) {
       `"${product.name}" fue agregado al carrito.`
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     addingId.value = null
   }

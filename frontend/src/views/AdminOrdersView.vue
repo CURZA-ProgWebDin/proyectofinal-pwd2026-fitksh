@@ -18,6 +18,8 @@ import {
   formatStatus,
 } from '../utils/formatters'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const orders = ref([])
 const statuses = ref([])
 const selectedStatuses = reactive({})
@@ -62,14 +64,6 @@ function getStatusClass(statusName) {
   }
 }
 
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || error.response?.data?.msg
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
-}
-
 function clearMessages() {
   errorMessage.value = ''
   successMessage.value = ''
@@ -105,7 +99,7 @@ async function loadOrders() {
       selectedStatuses[order.id] = ''
     }
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -169,7 +163,7 @@ async function changeOrderStatus(order) {
       `Pedido #${order.id} actualizado correctamente.`
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     updatingId.value = null
   }

@@ -17,6 +17,8 @@ import {
 
 import { formatPrice } from '../utils/formatters'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const products = ref([])
 const categories = ref([])
 
@@ -57,13 +59,6 @@ const availableCategories = computed(() => {
 function clearMessages() {
   errorMessage.value = ''
   successMessage.value = ''
-}
-
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
 }
 
 function resetForm() {
@@ -143,7 +138,7 @@ async function loadData() {
     categories.value = await getCategories()
     products.value = await getProducts()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -183,7 +178,7 @@ async function submitForm() {
     resetForm()
     await loadData()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     saving.value = false
   }
@@ -247,7 +242,7 @@ async function changeProductStatus(product) {
 
     await loadData()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     changingId.value = null
   }

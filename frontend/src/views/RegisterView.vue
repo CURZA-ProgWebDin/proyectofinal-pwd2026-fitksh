@@ -10,6 +10,8 @@ import {
 
 import { useAuth } from '../stores/auth'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const router = useRouter()
 const auth = useAuth()
 
@@ -23,13 +25,6 @@ const form = reactive({
 
 const submitting = ref(false)
 const errorMessage = ref('')
-
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || 'No fue posible completar el registro.'
-  )
-}
 
 async function submitRegistration() {
   errorMessage.value = ''
@@ -56,7 +51,10 @@ async function submitRegistration() {
       },
     })
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(
+      error,
+      'No fue posible completar el registro.',
+    )
   } finally {
     submitting.value = false
   }

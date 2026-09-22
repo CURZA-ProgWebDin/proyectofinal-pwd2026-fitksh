@@ -16,6 +16,10 @@ import {
 
 import { createOrder } from '../services/orderService'
 
+import { formatPrice } from '../utils/formatters'
+
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const cart = ref(null)
 const quantities = reactive({})
 
@@ -34,26 +38,9 @@ const hasItems = computed(() => {
   return cart.value?.items?.length > 0
 })
 
-const priceFormatter = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-})
-
-function formatPrice(price) {
-  return priceFormatter.format(price)
-}
-
 function clearMessages() {
   errorMessage.value = ''
   successMessage.value = ''
-}
-
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || error.response?.data?.msg
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
 }
 
 function setCart(updatedCart) {
@@ -75,7 +62,7 @@ async function loadCart() {
   try {
     setCart(await getCart())
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -122,7 +109,7 @@ async function changeQuantity(item) {
     )
   } catch (error) {
     quantities[item.id] = item.quantity
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     changingId.value = null
   }
@@ -148,7 +135,7 @@ async function removeItem(item) {
       'Producto quitado del carrito.'
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     changingId.value = null
   }
@@ -174,7 +161,7 @@ async function emptyCart() {
       'Carrito vaciado correctamente.'
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     clearing.value = false
   }
@@ -219,7 +206,7 @@ async function confirmOrder() {
       `Pedido #${order.id} creado correctamente.`
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     creatingOrder.value = false
   }

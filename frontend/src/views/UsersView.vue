@@ -16,6 +16,8 @@ import {
   updateUser,
 } from '../services/userService'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const auth = useAuth()
 
 const users = ref([])
@@ -46,14 +48,6 @@ const isEditingCurrentUser = computed(() => {
 function clearMessages() {
   errorMessage.value = ''
   successMessage.value = ''
-}
-
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || error.response?.data?.msg
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
 }
 
 function resetForm() {
@@ -138,7 +132,7 @@ async function loadData() {
     roles.value = await getRoles()
     users.value = await getUsers()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -183,7 +177,7 @@ async function submitForm() {
     resetForm()
     await loadData()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     saving.value = false
   }
@@ -252,7 +246,7 @@ async function changeUserStatus(user) {
 
     await loadData()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     changingId.value = null
   }

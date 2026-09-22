@@ -16,6 +16,8 @@ import {
   formatStatus,
 } from '../utils/formatters'
 
+import { getApiErrorMessage } from '../utils/apiErrors'
+
 const orders = ref([])
 const loading = ref(false)
 const cancellingId = ref(null)
@@ -35,14 +37,6 @@ function getStatusClass(statusName) {
     'status-delivered': statusName === 'ENTREGADO',
     'status-cancelled': statusName === 'CANCELADO',
   }
-}
-
-function getErrorMessage(error) {
-  return (
-    error.response?.data?.error
-    || error.response?.data?.msg
-    || 'Ocurrió un error al procesar la solicitud.'
-  )
 }
 
 function clearMessages() {
@@ -65,7 +59,7 @@ async function loadOrders() {
   try {
     orders.value = await getOrders()
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     loading.value = false
   }
@@ -99,7 +93,7 @@ async function cancelPendingOrder(order) {
       `Pedido #${order.id} cancelado correctamente.`
     )
   } catch (error) {
-    errorMessage.value = getErrorMessage(error)
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     cancellingId.value = null
   }
