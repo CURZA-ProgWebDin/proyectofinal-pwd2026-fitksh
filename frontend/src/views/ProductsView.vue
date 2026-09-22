@@ -30,6 +30,9 @@ const editingId = ref(null)
 const errorMessage = ref('')
 const successMessage = ref('')
 
+const MAX_PRICE = 9999999999.99
+const MAX_INTEGER = 2147483647
+
 const form = reactive({
   category_id: '',
   name: '',
@@ -124,6 +127,31 @@ function validateForm() {
   if (!Number.isInteger(stock) || stock < 0) {
     errorMessage.value = (
       'El stock debe ser un entero mayor o igual que cero.'
+    )
+    return false
+  }
+
+  if (form.stock === '') {
+    errorMessage.value = 'El stock es obligatorio.'
+    return false
+  }
+
+  if (
+    retailPrice > MAX_PRICE
+    || wholesalePrice > MAX_PRICE
+  ) {
+    errorMessage.value = (
+      'Los precios no pueden superar 9999999999.99.'
+    )
+    return false
+  }
+
+  if (
+    minimumQuantity > MAX_INTEGER
+    || stock > MAX_INTEGER
+  ) {
+    errorMessage.value = (
+      'El stock y la cantidad mínima no pueden superar 2147483647.'
     )
     return false
   }
@@ -335,6 +363,7 @@ onMounted(loadData)
               v-model.number="form.retail_price"
               type="number"
               min="0"
+            :max="MAX_PRICE"
               step="0.01"
               required
             >
@@ -350,6 +379,7 @@ onMounted(loadData)
               v-model.number="form.wholesale_price"
               type="number"
               min="0"
+              :max="MAX_PRICE"
               step="0.01"
               required
             >

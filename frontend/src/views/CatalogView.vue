@@ -65,7 +65,24 @@ async function loadData() {
   }
 }
 
+function getAvailableQuantity(product) {
+  const item = cart.value?.items?.find(
+    (item) => item.product_id === product.id,
+  )
+
+  const quantityInCart = item?.quantity ?? 0
+
+  return Math.max(
+    product.stock - quantityInCart,
+    0,
+  )
+}
+
 async function addProduct(product) {
+  if (addingId.value !== null) {
+    return
+  }
+
   clearMessages()
 
   const quantity = Number(quantities[product.id])
@@ -77,9 +94,11 @@ async function addProduct(product) {
     return
   }
 
-  if (quantity > product.stock) {
+  const availableQuantity = getAvailableQuantity(product)
+
+  if (quantity > availableQuantity) {
     errorMessage.value = (
-      `Solo hay ${product.stock} unidades disponibles.`
+      `Podés agregar hasta ${availableQuantity} unidades más de este producto.`
     )
     return
   }
@@ -212,16 +231,22 @@ onMounted(loadData)
               v-model.number="quantities[product.id]"
               type="number"
               min="1"
-              :max="product.stock"
+              :max="getAvailableQuantity(product)"
               step="1"
-              :disabled="product.stock === 0"
+              :disabled="
+                getAvailableQuantity(product) === 0
+                || addingId !== null
+              "
             >
+            <small>
+              Podés agregar {{ getAvailableQuantity(product) }} unidades más.
+            </small>
 
             <button
               type="button"
               :disabled="
-                product.stock === 0
-                || addingId === product.id
+                getAvailableQuantity(product) === 0
+                || addingId !== null
               "
               @click="addProduct(product)"
             >

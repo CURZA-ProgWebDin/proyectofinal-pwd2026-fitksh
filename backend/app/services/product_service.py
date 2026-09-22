@@ -265,9 +265,11 @@ class ProductService:
             isinstance(quantity, bool)
             or not isinstance(quantity, int)
             or quantity <= 0
+            or quantity > 2147483647
         ):
             raise ValueError(
-                "La cantidad mínima mayorista debe ser un entero mayor que cero."
+                "La cantidad mínima mayorista debe ser "
+                "un entero entre 1 y 2147483647."
             )
 
         return quantity
@@ -278,9 +280,11 @@ class ProductService:
             isinstance(stock, bool)
             or not isinstance(stock, int)
             or stock < 0
+            or stock > 2147483647
         ):
             raise ValueError(
-                "El stock debe ser un entero mayor o igual que cero."
+                "El stock debe ser un entero "
+                "entre 0 y 2147483647."
             )
 
         return stock
