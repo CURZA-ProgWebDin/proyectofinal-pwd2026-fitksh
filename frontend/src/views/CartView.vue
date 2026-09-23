@@ -446,7 +446,7 @@ onMounted(loadCart)
             v-model="notes"
             rows="3"
             placeholder="Información adicional para el pedido"
-            :disabled="creatingOrder"
+            :disabled="isBusy"
           />
         </div>
 

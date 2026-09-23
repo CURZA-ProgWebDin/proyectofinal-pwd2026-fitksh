@@ -343,6 +343,7 @@ onMounted(loadData)
             <select
               id="product-category"
               v-model.number="form.category_id"
+              :disabled="isBusy"
               required
             >
               <option disabled value="">
@@ -369,6 +370,7 @@ onMounted(loadData)
               v-model.trim="form.name"
               type="text"
               maxlength="150"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -385,6 +387,7 @@ onMounted(loadData)
               min="0"
             :max="MAX_PRICE"
               step="0.01"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -401,6 +404,7 @@ onMounted(loadData)
               min="0"
               :max="MAX_PRICE"
               step="0.01"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -417,7 +421,9 @@ onMounted(loadData)
               "
               type="number"
               min="1"
+              :max="MAX_INTEGER"
               step="1"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -430,7 +436,9 @@ onMounted(loadData)
               v-model.number="form.stock"
               type="number"
               min="0"
+              :max="MAX_INTEGER"
               step="1"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -443,6 +451,7 @@ onMounted(loadData)
             id="product-description"
             v-model.trim="form.description"
             rows="3"
+            :disabled="isBusy"
           />
         </div>
 
@@ -457,6 +466,7 @@ onMounted(loadData)
             type="url"
             maxlength="500"
             placeholder="https://ejemplo.com/imagen.jpg"
+            :disabled="isBusy"
           >
         </div>
 

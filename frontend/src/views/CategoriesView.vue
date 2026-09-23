@@ -192,6 +192,7 @@ onMounted(loadCategories)
             type="text"
             maxlength="100"
             required
+            :disabled="isBusy"
           >
         </div>
 
@@ -205,6 +206,7 @@ onMounted(loadCategories)
             v-model.trim="form.description"
             maxlength="255"
             rows="3"
+            :disabled="isBusy"
           />
         </div>
 

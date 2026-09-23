@@ -113,7 +113,7 @@ async function submitForm() {
     return
   }
 
-  isBusy.value = true
+  saving.value = true
 
   const userData = {
     first_name: form.first_name,
@@ -147,11 +147,15 @@ async function submitForm() {
   } catch (error) {
     errorMessage.value = getApiErrorMessage(error)
   } finally {
-    isBusy.value = false
+    saving.value = false
   }
 }
 
 function startEditing(user) {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   editingId.value = user.id
@@ -168,6 +172,10 @@ function startEditing(user) {
 }
 
 function cancelEditing() {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
   resetForm()
 }
@@ -268,6 +276,7 @@ onMounted(loadData)
               v-model.trim="form.first_name"
               type="text"
               maxlength="80"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -280,6 +289,7 @@ onMounted(loadData)
               v-model.trim="form.last_name"
               type="text"
               maxlength="80"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -292,6 +302,7 @@ onMounted(loadData)
               v-model.trim="form.email"
               type="email"
               maxlength="150"
+              :disabled="isBusy"
               required
             >
           </div>
@@ -302,7 +313,7 @@ onMounted(loadData)
             <select
               id="user-role"
               v-model.number="form.role_id"
-              :disabled="isbusy"
+              :disabled="isBusy || isEditingCurrentUser"
               required
             >
               <option disabled value="">
@@ -337,6 +348,7 @@ onMounted(loadData)
             maxlength="128"
             :required="!isEditing"
             autocomplete="new-password"
+            :disabled="isBusy"
           >
 
           <small>
