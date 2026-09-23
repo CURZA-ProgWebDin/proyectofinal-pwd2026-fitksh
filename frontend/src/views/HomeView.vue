@@ -16,10 +16,21 @@ const auth = useAuth()
 
 const message = ref('Comprobando conexión con el backend...')
 const connected = ref(false)
+const loggingOut = ref(false)
 
 async function logout() {
-  await auth.logout()
-  await router.push('/login')
+  if (loggingOut.value) {
+    return
+  }
+
+  loggingOut.value = true
+
+  try {
+    await auth.logout()
+    await router.push('/login')
+  } finally {
+    loggingOut.value = false
+  }
 }
 
 onMounted(async () => {
@@ -67,8 +78,12 @@ onMounted(async () => {
           Rol: {{ auth.state.user.role.name }}
         </p>
 
-        <button type="button" @click="logout">
-          Cerrar sesión
+        <button
+          type="button"
+          :disabled="loggingOut"
+          @click="logout"
+        >
+          {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
         </button>
       </div>
 

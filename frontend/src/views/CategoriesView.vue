@@ -17,6 +17,13 @@ import {
 import { getApiErrorMessage } from '../utils/apiErrors'
 
 const categories = ref([])
+const isBusy = computed(() => {
+  return (
+    loading.value
+    || saving.value
+    || changingId.value !== null
+  )
+})
 const loading = ref(false)
 const saving = ref(false)
 const changingId = ref(null)
@@ -56,6 +63,9 @@ async function loadCategories() {
 }
 
 async function submitForm() {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
 
   if (!form.name.trim()) {
@@ -89,6 +99,9 @@ async function submitForm() {
 }
 
 function startEditing(category) {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
 
   editingId.value = category.id
@@ -97,11 +110,17 @@ function startEditing(category) {
 }
 
 function cancelEditing() {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
   resetForm()
 }
 
 async function changeCategoryStatus(category) {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
 
   if (
@@ -190,7 +209,7 @@ onMounted(loadCategories)
         </div>
 
         <div class="form-actions">
-          <button type="submit" :disabled="saving">
+          <button type="submit" :disabled="isBusy">
             {{
               saving
                 ? 'Guardando...'
@@ -204,7 +223,7 @@ onMounted(loadCategories)
             v-if="isEditing"
             type="button"
             class="secondary-button"
-            :disabled="saving"
+            :disabled="isBusy"
             @click="cancelEditing"
           >
             Cancelar
@@ -277,7 +296,7 @@ onMounted(loadCategories)
                       ? 'danger-button'
                       : 'success-button'
                   "
-                  :disabled="changingId === category.id"
+                  :disabled="isBusy || changingId === category.id"
                   @click="changeCategoryStatus(category)"
                 >
                   {{

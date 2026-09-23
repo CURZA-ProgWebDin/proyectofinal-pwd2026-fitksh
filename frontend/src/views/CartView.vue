@@ -34,6 +34,15 @@ const notes = ref('')
 const creatingOrder = ref(false)
 const createdOrder = ref(null)
 
+const isBusy = computed(() => {
+  return (
+    loading.value
+    || changingId.value !== null
+    || clearing.value
+    || creatingOrder.value
+  )
+})
+
 const hasItems = computed(() => {
   return cart.value?.items?.length > 0
 })
@@ -69,6 +78,10 @@ async function loadCart() {
 }
 
 async function changeQuantity(item) {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   const quantity = Number(quantities[item.id])
@@ -116,6 +129,10 @@ async function changeQuantity(item) {
 }
 
 async function removeItem(item) {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   if (
@@ -142,6 +159,10 @@ async function removeItem(item) {
 }
 
 async function emptyCart() {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   if (
@@ -168,6 +189,10 @@ async function emptyCart() {
 }
 
 async function confirmOrder() {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   if (!hasItems.value) {
@@ -348,19 +373,13 @@ onMounted(loadCart)
                       min="1"
                       :max="item.product.stock"
                       step="1"
-                      :disabled="
-                        !item.product.active
-                        || changingId === item.id
-                      "
+                      :disabled="isBusy || !item.product.active"
                     >
 
                     <button
                       type="button"
                       class="secondary-button"
-                      :disabled="
-                        !item.product.active
-                        || changingId === item.id
-                      "
+                      :disabled="isBusy || !item.product.active"
                       @click="changeQuantity(item)"
                     >
                       Actualizar
@@ -376,7 +395,7 @@ onMounted(loadCart)
                   <button
                     type="button"
                     class="danger-button"
-                    :disabled="changingId === item.id"
+                    :disabled="isBusy"
                     @click="removeItem(item)"
                   >
                     Quitar
@@ -409,7 +428,7 @@ onMounted(loadCart)
         <button
           type="button"
           class="danger-button"
-          :disabled="clearing"
+          :disabled="isBusy"
           @click="emptyCart"
         >
           {{ clearing ? 'Vaciando...' : 'Vaciar carrito' }}
@@ -433,7 +452,7 @@ onMounted(loadCart)
 
         <button
           type="button"
-          :disabled="creatingOrder"
+          :disabled="isBusy"
           @click="confirmOrder"
         >
           {{

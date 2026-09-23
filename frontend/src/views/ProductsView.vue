@@ -22,6 +22,13 @@ import { getApiErrorMessage } from '../utils/apiErrors'
 const products = ref([])
 const categories = ref([])
 
+const isBusy = computed(() => {
+  return (
+    loading.value
+    || saving.value
+    || changingId.value !== null
+  )
+})
 const loading = ref(false)
 const saving = ref(false)
 const changingId = ref(null)
@@ -173,6 +180,9 @@ async function loadData() {
 }
 
 async function submitForm() {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
 
   if (!validateForm()) {
@@ -213,6 +223,9 @@ async function submitForm() {
 }
 
 function startEditing(product) {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
 
   editingId.value = product.id
@@ -234,11 +247,18 @@ function startEditing(product) {
 }
 
 function cancelEditing() {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
   resetForm()
 }
 
 async function changeProductStatus(product) {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   if (
@@ -444,7 +464,7 @@ onMounted(loadData)
           <button
             type="submit"
             :disabled="
-              saving || activeCategories.length === 0
+              isBusy || activeCategories.length === 0
             "
           >
             {{
@@ -460,7 +480,7 @@ onMounted(loadData)
             v-if="isEditing"
             type="button"
             class="secondary-button"
-            :disabled="saving"
+            :disabled="isBusy"
             @click="cancelEditing"
           >
             Cancelar
@@ -572,7 +592,7 @@ onMounted(loadData)
                       ? 'danger-button'
                       : 'success-button'
                   "
-                  :disabled="changingId === product.id"
+                  :disabled="isBusy"
                   @click="changeProductStatus(product)"
                 >
                   {{

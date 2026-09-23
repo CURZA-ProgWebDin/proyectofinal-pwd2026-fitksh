@@ -2,6 +2,7 @@
 import {
   onMounted,
   reactive,
+  computed,
   ref,
 } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -26,6 +27,10 @@ const selectedStatuses = reactive({})
 
 const loading = ref(false)
 const updatingId = ref(null)
+const isBusy = computed(() => {
+  return loading.value || updatingId.value !== null
+})
+
 const expandedOrderId = ref(null)
 
 const errorMessage = ref('')
@@ -106,6 +111,9 @@ async function loadOrders() {
 }
 
 async function changeOrderStatus(order) {
+  if (isBusy.value) {
+    return
+  }
   clearMessages()
 
   const statusId = Number(
@@ -281,7 +289,7 @@ onMounted(loadOrders)
               <select
                 :id="`status-${order.id}`"
                 v-model="selectedStatuses[order.id]"
-                :disabled="updatingId === order.id"
+                :disabled="isBusy"
               >
                 <option value="">
                   Seleccionar estado
@@ -298,7 +306,7 @@ onMounted(loadOrders)
 
               <button
                 type="button"
-                :disabled="updatingId === order.id"
+                :disabled="isBusy || !selectedStatuses[order.id]"
                 @click="changeOrderStatus(order)"
               >
                 {{

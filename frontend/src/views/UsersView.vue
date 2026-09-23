@@ -25,6 +25,13 @@ const auth = useAuth()
 const users = ref([])
 const roles = ref([])
 
+const isBusy = computed(() => {
+  return (
+    loading.value
+    || saving.value
+    || changingId.value !== null
+  )
+})
 const loading = ref(false)
 const saving = ref(false)
 const changingId = ref(null)
@@ -97,7 +104,7 @@ async function loadData() {
 }
 
 async function submitForm() {
-  if (saving.value) {
+  if (isBusy.value) {
     return
   }
   clearMessages()
@@ -106,7 +113,7 @@ async function submitForm() {
     return
   }
 
-  saving.value = true
+  isBusy.value = true
 
   const userData = {
     first_name: form.first_name,
@@ -140,7 +147,7 @@ async function submitForm() {
   } catch (error) {
     errorMessage.value = getApiErrorMessage(error)
   } finally {
-    saving.value = false
+    isBusy.value = false
   }
 }
 
@@ -166,6 +173,10 @@ function cancelEditing() {
 }
 
 async function changeUserStatus(user) {
+  if (isBusy.value) {
+    return
+  }
+
   clearMessages()
 
   if (
@@ -291,7 +302,7 @@ onMounted(loadData)
             <select
               id="user-role"
               v-model.number="form.role_id"
-              :disabled="isEditingCurrentUser"
+              :disabled="isbusy"
               required
             >
               <option disabled value="">
@@ -340,7 +351,7 @@ onMounted(loadData)
         <div class="form-actions">
           <button
             type="submit"
-            :disabled="saving || roles.length === 0"
+            :disabled="isBusy || roles.length === 0"
           >
             {{
               saving
@@ -355,7 +366,7 @@ onMounted(loadData)
             v-if="isEditing"
             type="button"
             class="secondary-button"
-            :disabled="saving"
+            :disabled="isBusy"
             @click="cancelEditing"
           >
             Cancelar
@@ -439,7 +450,7 @@ onMounted(loadData)
                       : 'success-button'
                   "
                   :disabled="
-                    changingId === user.id
+                    isBusy
                     || (
                       user.id === auth.state.user?.id
                       && user.active

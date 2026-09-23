@@ -1,8 +1,10 @@
 <script setup>
 import {
+  computed,
   onMounted,
   ref,
 } from 'vue'
+
 import { RouterLink } from 'vue-router'
 
 import {
@@ -21,6 +23,9 @@ import { getApiErrorMessage } from '../utils/apiErrors'
 const orders = ref([])
 const loading = ref(false)
 const cancellingId = ref(null)
+const isBusy = computed(() => {
+  return loading.value || cancellingId.value !== null
+})
 const expandedOrderId = ref(null)
 
 const errorMessage = ref('')
@@ -66,6 +71,10 @@ async function loadOrders() {
 }
 
 async function cancelPendingOrder(order) {
+  if (isBusy.value) {
+    return
+  }
+  
   clearMessages()
 
   if (
@@ -226,7 +235,7 @@ onMounted(loadOrders)
             v-if="order.status.name === 'PENDIENTE'"
             type="button"
             class="danger-button"
-            :disabled="cancellingId === order.id"
+            :disabled="isBusy"
             @click="cancelPendingOrder(order)"
           >
             {{
