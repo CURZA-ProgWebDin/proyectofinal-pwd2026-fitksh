@@ -1,14 +1,10 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy.exc import IntegrityError
-
-from app.extensions import db
-from app.models.cart import Cart
 from app.models.order import Order
 from app.models.order_detail import OrderDetail
-from app.models.order_status import OrderStatus
-
+from app.repositories.cart_repository import CartRepository
+from app.repositories.order_repository import OrderRepository
 
 class OrderService:
     ALLOWED_TRANSITIONS = {
@@ -33,18 +29,14 @@ class OrderService:
 
     @staticmethod
     def list_for_user(user):
-        query = Order.query
+        if user.role.name.upper() == "ADMINISTRADOR":
+            return OrderRepository.get_all()
 
-        if user.role.name.upper() != "ADMINISTRADOR":
-            query = query.filter_by(user_id=user.id)
-
-        return query.order_by(
-            Order.ordered_at.desc()
-        ).all()
+        return OrderRepository.get_all(user_id=user.id)
 
     @staticmethod
     def get_accessible_by_id(order_id, user):
-        order = db.session.get(Order, order_id)
+        order = OrderRepository.get_by_id(order_id)
 
         if order is None:
             return None
@@ -60,9 +52,7 @@ class OrderService:
 
     @staticmethod
     def list_statuses():
-        return OrderStatus.query.order_by(
-            OrderStatus.id
-        ).all()
+        return OrderRepository.get_statuses()
 
     @staticmethod
     def create_from_cart(user_id, data):
@@ -70,9 +60,7 @@ class OrderService:
             data.get("notes")
         )
 
-        cart = Cart.query.filter_by(
-            user_id=user_id
-        ).first()
+        cart = CartRepository.get_by_user_id(user_id)
 
         if cart is None or not cart.items:
             raise ValueError(
@@ -118,7 +106,7 @@ class OrderService:
             notes=notes,
         )
 
-        db.session.add(order)
+        OrderRepository.add(order)
 
         for item in cart_items:
             product = item.product
@@ -137,7 +125,7 @@ class OrderService:
         cart.items.clear()
         cart.updated_at = datetime.now(timezone.utc)
 
-        OrderService._commit(
+        OrderRepository.commit(
             "No fue posible crear el pedido."
         )
 
@@ -149,10 +137,7 @@ class OrderService:
             data.get("status_id")
         )
 
-        new_status = db.session.get(
-            OrderStatus,
-            status_id,
-        )
+        new_status = OrderRepository.get_status_by_id(status_id)
 
         if new_status is None:
             raise LookupError(
@@ -186,7 +171,7 @@ class OrderService:
         order.status_id = new_status.id
         order.updated_at = datetime.now(timezone.utc)
 
-        OrderService._commit(
+        OrderRepository.commit(
             "No fue posible actualizar el estado del pedido."
         )
 
@@ -215,7 +200,7 @@ class OrderService:
         order.status_id = cancelled_status.id
         order.updated_at = datetime.now(timezone.utc)
 
-        OrderService._commit(
+        OrderRepository.commit(
             "No fue posible cancelar el pedido."
         )
 
@@ -300,10 +285,7 @@ class OrderService:
 
     @staticmethod
     def _get_status_by_name(status_name):
-        status = OrderStatus.query.filter(
-            db.func.upper(OrderStatus.name)
-            == status_name.upper()
-        ).first()
+        status = OrderRepository.get_status_by_name(status_name)
 
         if status is None:
             raise RuntimeError(
@@ -341,14 +323,3 @@ class OrderService:
         notes = notes.strip()
 
         return notes if notes else None
-
-    @staticmethod
-    def _commit(error_message):
-        try:
-            db.session.commit()
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise ValueError(
-                error_message
-            ) from error
