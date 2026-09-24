@@ -1,20 +1,16 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy.exc import IntegrityError
-
-from app.extensions import db
 from app.models.cart import Cart
 from app.models.cart_item import CartItem
-from app.models.product import Product
-
+from app.repositories.cart_repository import CartRepository
+from app.repositories.product_repository import ProductRepository
 
 class CartService:
+
     @staticmethod
     def get_by_user_id(user_id):
-        return Cart.query.filter_by(
-            user_id=user_id
-        ).first()
+        return CartRepository.get_by_user_id(user_id)
 
     @staticmethod
     def add_item(user_id, data):
@@ -63,13 +59,13 @@ class CartService:
             item.quantity = new_quantity
 
         CartService._touch(cart)
-        CartService._commit()
+        CartRepository.commit()
 
         return cart, created
 
     @staticmethod
     def update_item(user_id, item_id, data):
-        item = CartService._get_item_for_user(
+        item = CartRepository.get_item_for_user(
             user_id,
             item_id,
         )
@@ -95,13 +91,13 @@ class CartService:
         item.quantity = quantity
 
         CartService._touch(item.cart)
-        CartService._commit()
+        CartRepository.commit()
 
         return item.cart
 
     @staticmethod
     def remove_item(user_id, item_id):
-        item = CartService._get_item_for_user(
+        item = CartRepository.get_item_for_user(
             user_id,
             item_id,
         )
@@ -113,10 +109,10 @@ class CartService:
 
         cart = item.cart
 
-        db.session.delete(item)
+        CartRepository.delete_item(item)
 
         CartService._touch(cart)
-        CartService._commit()
+        CartRepository.commit()
 
         return cart
 
@@ -130,7 +126,7 @@ class CartService:
         cart.items.clear()
 
         CartService._touch(cart)
-        CartService._commit()
+        CartRepository.commit()
 
         return cart
 
@@ -200,25 +196,14 @@ class CartService:
 
         if cart is None:
             cart = Cart(user_id=user_id)
-            db.session.add(cart)
+            CartRepository.add(cart)
 
         return cart
 
-    @staticmethod
-    def _get_item_for_user(user_id, item_id):
-        return (
-            CartItem.query
-            .join(Cart)
-            .filter(
-                CartItem.id == item_id,
-                Cart.user_id == user_id,
-            )
-            .first()
-        )
 
     @staticmethod
     def _get_available_product(product_id):
-        product = db.session.get(Product, product_id)
+        product = ProductRepository.get_by_id(product_id)
 
         if product is None:
             raise LookupError(
@@ -271,14 +256,3 @@ class CartService:
     @staticmethod
     def _touch(cart):
         cart.updated_at = datetime.now(timezone.utc)
-
-    @staticmethod
-    def _commit():
-        try:
-            db.session.commit()
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise ValueError(
-                "No fue posible actualizar el carrito."
-            ) from error
