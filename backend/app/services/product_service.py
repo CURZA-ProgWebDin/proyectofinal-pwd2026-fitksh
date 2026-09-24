@@ -1,20 +1,17 @@
 from decimal import Decimal, InvalidOperation
 
-from sqlalchemy.exc import IntegrityError
-
-from app.extensions import db
-from app.models.category import Category
 from app.models.product import Product
-
+from app.repositories.category_repository import CategoryRepository
+from app.repositories.product_repository import ProductRepository
 
 class ProductService:
     @staticmethod
     def get_all():
-        return Product.query.order_by(Product.name.asc()).all()
+        return ProductRepository.get_all()
 
     @staticmethod
     def get_by_id(product_id):
-        return db.session.get(Product, product_id)
+        return ProductRepository.get_by_id(product_id)
 
     @staticmethod
     def create(data):
@@ -65,8 +62,8 @@ class ProductService:
             image_url=image_url,
         )
 
-        db.session.add(product)
-        ProductService._commit()
+        ProductRepository.add(product)
+        ProductRepository.commit()
 
         return product
 
@@ -157,14 +154,14 @@ class ProductService:
 
             product.active = active
 
-        ProductService._commit()
+        ProductRepository.commit()
 
         return product
 
     @staticmethod
     def deactivate(product):
         product.active = False
-        ProductService._commit()
+        ProductRepository.commit()
 
         return product
 
@@ -179,7 +176,7 @@ class ProductService:
                 "Debe seleccionar una categoría válida."
             )
 
-        category = db.session.get(Category, category_id)
+        category = CategoryRepository.get_by_id(category_id)
 
         if category is None:
             raise ValueError(
@@ -307,14 +304,3 @@ class ProductService:
             )
 
         return image_url or None
-
-    @staticmethod
-    def _commit():
-        try:
-            db.session.commit()
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise ValueError(
-                "No fue posible guardar el producto. Verificá sus datos."
-            ) from error
