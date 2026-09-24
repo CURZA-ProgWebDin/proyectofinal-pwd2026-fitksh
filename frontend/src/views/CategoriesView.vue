@@ -253,6 +253,14 @@ onMounted(loadCategories)
 
       <p v-if="loading">Cargando categorías...</p>
 
+      <p
+        v-else-if="loadError"
+        class="message error-message"
+        role="alert"
+      >
+        {{ loadError }}
+      </p>
+
       <p v-else-if="categories.length === 0">
         Todavía no hay categorías registradas.
       </p>

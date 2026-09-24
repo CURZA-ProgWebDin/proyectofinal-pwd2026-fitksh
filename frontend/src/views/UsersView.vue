@@ -405,6 +405,14 @@ onMounted(loadData)
 
       <p v-if="loading">Cargando usuarios...</p>
 
+      <p
+        v-else-if="loadError"
+        class="message error-message"
+        role="alert"
+      >
+        {{ loadError }}
+      </p>
+
       <p v-else-if="users.length === 0">
         No hay usuarios registrados.
       </p>

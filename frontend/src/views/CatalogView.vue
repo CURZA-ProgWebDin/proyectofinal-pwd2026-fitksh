@@ -179,6 +179,14 @@ onMounted(loadData)
       Cargando productos...
     </p>
 
+    <p
+      v-else-if="loadError"
+      class="message error-message"
+      role="alert"
+    >
+      {{ loadError }}
+    </p>
+
     <p v-else-if="activeProducts.length === 0">
       No hay productos disponibles.
     </p>

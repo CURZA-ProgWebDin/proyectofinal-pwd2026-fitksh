@@ -161,6 +161,14 @@ onMounted(loadOrders)
       Cargando pedidos...
     </p>
 
+    <p
+      v-else-if="loadError"
+      class="message error-message"
+      role="alert"
+    >
+      {{ loadError }}
+    </p>
+
     <section
       v-else-if="orders.length === 0"
       class="empty-state"
