@@ -1,17 +1,15 @@
-from sqlalchemy.exc import IntegrityError
-
-from app.extensions import db
 from app.models.category import Category
+from app.repositories.category_repository import CategoryRepository
 
 
 class CategoryService:
     @staticmethod
     def get_all():
-        return Category.query.order_by(Category.name.asc()).all()
+        return CategoryRepository.get_all()
 
     @staticmethod
     def get_by_id(category_id):
-        return db.session.get(Category, category_id)
+        return CategoryRepository.get_by_id(category_id)
 
     @staticmethod
     def create(data):
@@ -20,7 +18,7 @@ class CategoryService:
             data.get("description")
         )
 
-        if CategoryService._name_exists(name):
+        if CategoryRepository.name_exists(name):
             raise FileExistsError(
                 "Ya existe una categoría con ese nombre."
             )
@@ -30,8 +28,8 @@ class CategoryService:
             description=description,
         )
 
-        db.session.add(category)
-        CategoryService._commit()
+        CategoryRepository.add(category)
+        CategoryRepository.commit()
 
         return category
 
@@ -45,7 +43,7 @@ class CategoryService:
         if "name" in data:
             name = CategoryService._validate_name(data.get("name"))
 
-            if CategoryService._name_exists(
+            if CategoryRepository.name_exists(
                 name,
                 exclude_id=category.id,
             ):
@@ -72,14 +70,14 @@ class CategoryService:
 
             category.active = active
 
-        CategoryService._commit()
+        CategoryRepository.commit()
 
         return category
 
     @staticmethod
     def deactivate(category):
         category.active = False
-        CategoryService._commit()
+        CategoryRepository.commit()
 
         return category
 
@@ -122,25 +120,3 @@ class CategoryService:
             )
 
         return description or None
-
-    @staticmethod
-    def _name_exists(name, exclude_id=None):
-        query = Category.query.filter(
-            db.func.lower(Category.name) == name.lower()
-        )
-
-        if exclude_id is not None:
-            query = query.filter(Category.id != exclude_id)
-
-        return query.first() is not None
-
-    @staticmethod
-    def _commit():
-        try:
-            db.session.commit()
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise FileExistsError(
-                "No fue posible guardar la categoría porque sus datos están duplicados."
-            ) from error
