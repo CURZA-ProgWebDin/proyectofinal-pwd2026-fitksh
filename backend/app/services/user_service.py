@@ -1,31 +1,21 @@
 import re
 
-from sqlalchemy.exc import IntegrityError
-
-from app.extensions import db
-from app.models.role import Role
 from app.models.user import User
-
+from app.repositories.role_repository import RoleRepository
+from app.repositories.user_repository import UserRepository
 
 class UserService:
     @staticmethod
     def get_all():
-        return User.query.order_by(
-            User.last_name.asc(),
-            User.first_name.asc(),
-        ).all()
+        return UserRepository.get_all()
 
     @staticmethod
     def get_by_id(user_id):
-        return db.session.get(User, user_id)
+        return UserRepository.get_by_id(user_id)
 
     @staticmethod
     def get_active_roles():
-        return Role.query.filter(
-            Role.active.is_(True)
-        ).order_by(
-            Role.name.asc()
-        ).all()
+        return RoleRepository.get_active()
 
     @staticmethod
     def create(data):
@@ -51,7 +41,7 @@ class UserService:
             data.get("role_id")
         )
 
-        if UserService._email_exists(email):
+        if UserRepository.email_exists(email):
             raise FileExistsError(
                 "Ya existe un usuario registrado con ese email."
             )
@@ -65,8 +55,8 @@ class UserService:
 
         user.set_password(password)
 
-        db.session.add(user)
-        UserService._commit()
+        UserRepository.add(user)
+        UserRepository.commit()
 
         return user
 
@@ -115,7 +105,7 @@ class UserService:
                 data.get("email")
             )
 
-            if UserService._email_exists(
+            if UserRepository.email_exists(
                 new_email,
                 exclude_id=user.id,
             ):
@@ -168,7 +158,7 @@ class UserService:
         if (
             currently_active_admin
             and removes_admin_access
-            and UserService._active_admin_count() <= 1
+            and UserRepository.count_active_admins() <= 1
         ):
             raise PermissionError(
                 "Debe existir al menos un administrador activo."
@@ -183,7 +173,7 @@ class UserService:
         if new_password is not None:
             user.set_password(new_password)
 
-        UserService._commit()
+        UserRepository.commit()
 
         return user
 
@@ -202,14 +192,14 @@ class UserService:
 
         if (
             is_active_admin
-            and UserService._active_admin_count() <= 1
+            and UserRepository.count_active_admins() <= 1
         ):
             raise PermissionError(
                 "Debe existir al menos un administrador activo."
             )
 
         user.active = False
-        UserService._commit()
+        UserRepository.commit()
 
         return user
 
@@ -224,7 +214,7 @@ class UserService:
                 "Debe seleccionar un rol válido."
             )
 
-        role = db.session.get(Role, role_id)
+        role = RoleRepository.get_by_id(role_id)
 
         if role is None:
             raise ValueError(
@@ -315,34 +305,3 @@ class UserService:
             )
 
         return password
-
-    @staticmethod
-    def _email_exists(email, exclude_id=None):
-        query = User.query.filter(
-            db.func.lower(User.email) == email
-        )
-
-        if exclude_id is not None:
-            query = query.filter(
-                User.id != exclude_id
-            )
-
-        return query.first() is not None
-
-    @staticmethod
-    def _active_admin_count():
-        return User.query.join(Role).filter(
-            User.active.is_(True),
-            db.func.upper(Role.name) == "ADMINISTRADOR",
-        ).count()
-
-    @staticmethod
-    def _commit():
-        try:
-            db.session.commit()
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise FileExistsError(
-                "No fue posible guardar el usuario."
-            ) from error
