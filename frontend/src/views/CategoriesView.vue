@@ -31,6 +31,7 @@ const editingId = ref(null)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const loadError = ref('')
 
 const form = reactive({
   name: '',
@@ -51,12 +52,17 @@ function resetForm() {
 }
 
 async function loadCategories() {
+  loadError.value = ''
+
   loading.value = true
 
   try {
     categories.value = await getCategories()
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error)
+    loadError.value = getApiErrorMessage(
+      error,
+      'No se pudo cargar las categorías. Intentá nuevamente.',
+    )
   } finally {
     loading.value = false
   }
@@ -286,6 +292,7 @@ onMounted(loadCategories)
                 <button
                   type="button"
                   class="secondary-button"
+                  :disabled="isBusy"
                   @click="startEditing(category)"
                 >
                   Editar

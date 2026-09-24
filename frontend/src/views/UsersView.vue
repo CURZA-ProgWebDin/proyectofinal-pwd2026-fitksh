@@ -39,6 +39,7 @@ const editingId = ref(null)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const loadError = ref('')
 
 const form = reactive({
   first_name: '',
@@ -91,13 +92,17 @@ function validateForm() {
 }
 
 async function loadData() {
+  loadError.value = ''
   loading.value = true
 
   try {
     roles.value = await getRoles()
     users.value = await getUsers()
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error)
+    loadError.value = getApiErrorMessage(
+      error,
+      'No se pudo cargar la información. Intentá nuevamente.',
+    )
   } finally {
     loading.value = false
   }
@@ -449,6 +454,7 @@ onMounted(loadData)
                 <button
                   type="button"
                   class="secondary-button"
+                  :disabled="isBusy"
                   @click="startEditing(user)"
                 >
                   Editar

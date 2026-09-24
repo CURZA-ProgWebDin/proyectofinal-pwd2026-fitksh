@@ -36,6 +36,7 @@ const editingId = ref(null)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const loadError = ref('')
 
 const MAX_PRICE = 9999999999.99
 const MAX_INTEGER = 2147483647
@@ -167,13 +168,17 @@ function validateForm() {
 }
 
 async function loadData() {
+  loadError.value = ''
   loading.value = true
 
   try {
     categories.value = await getCategories()
     products.value = await getProducts()
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error)
+    loadError.value = getApiErrorMessage(
+      error,
+      'No se pudo cargar la información. Intentá nuevamente.',
+    )
   } finally {
     loading.value = false
   }
@@ -328,7 +333,7 @@ onMounted(loadData)
       </h2>
 
       <p
-        v-if="activeCategories.length === 0"
+        v-if="!loading && !loadError && activeCategories.length === 0"
         class="category-warning"
       >
         Debe existir al menos una categoría activa para guardar
@@ -590,6 +595,7 @@ onMounted(loadData)
                 <button
                   type="button"
                   class="secondary-button"
+                  :disabled="isBusy"
                   @click="startEditing(product)"
                 >
                   Editar

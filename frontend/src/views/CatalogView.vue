@@ -27,6 +27,7 @@ const addingId = ref(null)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const loadError = ref('')
 
 const activeProducts = computed(() => {
   return products.value.filter(
@@ -40,6 +41,7 @@ function clearMessages() {
 }
 
 async function loadData() {
+  loadError.value = ''
   loading.value = true
   clearMessages()
 
@@ -59,7 +61,10 @@ async function loadData() {
       quantities[product.id] = 1
     }
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error)
+    loadError.value = getApiErrorMessage(
+      error,
+      'No se pudo cargar la información. Intentá nuevamente.',
+    )
   } finally {
     loading.value = false
   }

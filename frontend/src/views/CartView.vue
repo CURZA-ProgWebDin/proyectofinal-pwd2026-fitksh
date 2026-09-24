@@ -29,6 +29,7 @@ const clearing = ref(false)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const loadError = ref('')
 
 const notes = ref('')
 const creatingOrder = ref(false)
@@ -65,13 +66,17 @@ function setCart(updatedCart) {
 }
 
 async function loadCart() {
+  loadError.value = ''
   loading.value = true
   clearMessages()
 
   try {
     setCart(await getCart())
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error)
+    loadError.value = getApiErrorMessage(
+      error,
+      'No se pudo cargar la información. Intentá nuevamente.',
+    )
   } finally {
     loading.value = false
   }
@@ -274,6 +279,22 @@ onMounted(loadCart)
     <p v-if="loading">
       Cargando carrito...
     </p>
+
+    <div
+      v-else-if="loadError"
+      class="message error-message"
+      role="alert"
+    >
+      <p>{{ loadError }}</p>
+
+      <button
+        type="button"
+        :disabled="loading"
+        @click="loadCart"
+      >
+        Reintentar
+      </button>
+    </div>
 
     <section
     v-else-if="!hasItems"

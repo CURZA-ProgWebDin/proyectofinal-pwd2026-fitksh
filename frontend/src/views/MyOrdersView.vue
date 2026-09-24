@@ -30,6 +30,7 @@ const expandedOrderId = ref(null)
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const loadError = ref('')
 
 function getStatusClass(statusName) {
   return {
@@ -58,13 +59,18 @@ function toggleDetails(orderId) {
 }
 
 async function loadOrders() {
+
   loading.value = true
   errorMessage.value = ''
+  loadError.value = ''
 
   try {
     orders.value = await getOrders()
   } catch (error) {
-    errorMessage.value = getApiErrorMessage(error)
+    loadError.value = getApiErrorMessage(
+      error,
+      'No se pudo cargar la información. Intentá nuevamente.',
+    )
   } finally {
     loading.value = false
   }
