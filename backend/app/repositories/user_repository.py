@@ -18,6 +18,12 @@ class UserRepository:
         return db.session.get(User, user_id)
 
     @staticmethod
+    def get_by_email(email):
+        return User.query.filter(
+            db.func.lower(User.email) == email
+        ).first()
+
+    @staticmethod
     def email_exists(email, exclude_id=None):
         query = User.query.filter(
             db.func.lower(User.email) == email

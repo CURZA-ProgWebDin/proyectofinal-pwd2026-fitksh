@@ -6,13 +6,12 @@ from flask_jwt_extended import (
     create_refresh_token,
     decode_token,
 )
-from sqlalchemy.exc import IntegrityError
 
-from app.extensions import db
 from app.models.refresh_token import RefreshToken
-from app.models.role import Role
 from app.models.user import User
-
+from app.repositories.refresh_token_repository import RefreshTokenRepository
+from app.repositories.role_repository import RoleRepository
+from app.repositories.user_repository import UserRepository
 
 class AuthService:
    
@@ -50,17 +49,14 @@ class AuthService:
             data.get("password")
         )
 
-        if AuthService._email_exists(email):
+        if UserRepository.email_exists(email):
             raise FileExistsError(
                 "Ya existe un usuario registrado con ese email."
             )
 
         role_name = role_name.upper()
 
-        role = Role.query.filter(
-            db.func.upper(Role.name) == role_name,
-            Role.active.is_(True),
-        ).first()
+        role = RoleRepository.get_active_by_name(role_name)
 
         if role is None:
             raise RuntimeError(
@@ -76,16 +72,8 @@ class AuthService:
 
         user.set_password(password)
 
-        db.session.add(user)
-
-        try:
-            db.session.commit()
-        except IntegrityError as error:
-            db.session.rollback()
-
-            raise FileExistsError(
-                "Ya existe un usuario registrado con ese email."
-            ) from error
+        UserRepository.add(user)
+        UserRepository.commit()
 
         return user
 
@@ -102,9 +90,7 @@ class AuthService:
                 "La contraseña es obligatoria."
             )
 
-        user = User.query.filter(
-            db.func.lower(User.email) == email
-        ).first()
+        user = UserRepository.get_by_email(email)
 
         if user is None or not user.check_password(password):
             raise PermissionError(
@@ -138,8 +124,8 @@ class AuthService:
             ),
         )
 
-        db.session.add(stored_refresh_token)
-        db.session.commit()
+        RefreshTokenRepository.add(stored_refresh_token)
+        RefreshTokenRepository.commit()
 
         return user, access_token, refresh_token
     
@@ -147,10 +133,10 @@ class AuthService:
     def refresh_access_token(identity, token_identifier):
         user = AuthService.get_authenticated_user(identity)
 
-        stored_refresh_token = RefreshToken.query.filter(
-            RefreshToken.user_id == user.id,
-            RefreshToken.token_identifier == token_identifier,
-        ).first()
+        stored_refresh_token = RefreshTokenRepository.get_by_identifier(
+            user.id,
+            token_identifier,
+        )
 
         if stored_refresh_token is None:
             raise PermissionError(
@@ -180,10 +166,10 @@ class AuthService:
                 "La identidad del token no es válida."
             ) from error
 
-        stored_refresh_token = RefreshToken.query.filter(
-            RefreshToken.user_id == user_id,
-            RefreshToken.token_identifier == token_identifier,
-        ).first()
+        stored_refresh_token = RefreshTokenRepository.get_by_identifier(
+            user_id,
+            token_identifier,
+        )
 
         if stored_refresh_token is None:
             raise PermissionError(
@@ -195,8 +181,8 @@ class AuthService:
                 timezone.utc
             )
 
-            db.session.commit()
-            
+            RefreshTokenRepository.commit()
+
     @staticmethod
     def get_authenticated_user(identity):
         
@@ -207,7 +193,7 @@ class AuthService:
                 "La identidad del token no es válida."
             ) from error
 
-        user = db.session.get(User, user_id)
+        user = UserRepository.get_by_id(user_id)
 
         if user is None or not user.active:
             raise PermissionError(
@@ -309,9 +295,3 @@ class AuthService:
             )
 
         return password
-
-    @staticmethod
-    def _email_exists(email):
-        return User.query.filter(
-            db.func.lower(User.email) == email
-        ).first() is not None

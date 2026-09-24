@@ -14,3 +14,10 @@ class RoleRepository:
         ).order_by(
             Role.name.asc()
         ).all()
+
+    @staticmethod
+    def get_active_by_name(name):
+        return Role.query.filter(
+            db.func.upper(Role.name) == name.upper(),
+            Role.active.is_(True),
+        ).first()
