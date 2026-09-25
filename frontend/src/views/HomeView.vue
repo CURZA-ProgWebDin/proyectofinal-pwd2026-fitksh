@@ -1,37 +1,14 @@
 <script setup>
-import {
-  onMounted,
-  ref,
-} from 'vue'
-import {
-  RouterLink,
-  useRouter,
-} from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import api from '../services/api'
 import { useAuth } from '../stores/auth'
 
-const router = useRouter()
 const auth = useAuth()
 
 const message = ref('Comprobando conexión con el backend...')
 const connected = ref(false)
-const loggingOut = ref(false)
-
-async function logout() {
-  if (loggingOut.value) {
-    return
-  }
-
-  loggingOut.value = true
-
-  try {
-    await auth.logout()
-    await router.push('/login')
-  } finally {
-    loggingOut.value = false
-  }
-}
 
 onMounted(async () => {
   try {
@@ -78,13 +55,7 @@ onMounted(async () => {
           Rol: {{ auth.state.user.role.name }}
         </p>
 
-        <button
-          type="button"
-          :disabled="loggingOut"
-          @click="logout"
-        >
-          {{ loggingOut ? 'Cerrando sesión...' : 'Cerrar sesión' }}
-        </button>
+
       </div>
 
       <div v-else class="management-links">
@@ -147,7 +118,6 @@ onMounted(async () => {
 <style scoped>
 .home {
   display: flex;
-  min-height: 100vh;
   align-items: center;
   justify-content: center;
   padding: 24px;
@@ -186,12 +156,4 @@ onMounted(async () => {
   border-radius: 6px;
 }
 
-.session-info button {
-  padding: 9px 14px;
-  color: white;
-  cursor: pointer;
-  background-color: #b42318;
-  border: 0;
-  border-radius: 4px;
-}
 </style>

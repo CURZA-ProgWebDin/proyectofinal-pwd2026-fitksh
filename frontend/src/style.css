@@ -34,6 +34,16 @@ body {
   margin: 0;
 }
 
+#app {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+#app > main {
+  flex: 1;
+}
+
 h1,
 h2,
 h3 {
@@ -150,7 +160,6 @@ label {
 
 .auth-page {
   display: flex;
-  min-height: 100vh;
   align-items: center;
   justify-content: center;
   padding: 24px;
