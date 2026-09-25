@@ -76,7 +76,8 @@ a:hover {
 
 /* Botones compartidos */
 
-button {
+button,
+.button-link {
   min-height: 44px;
   padding: 10px 16px;
   font-weight: 600;
@@ -87,13 +88,16 @@ button {
   border-radius: 8px;
 }
 
-button:hover:not(:disabled) {
-  filter: brightness(0.95);
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+button:hover:not(:disabled),
+.button-link:hover {
+  filter: brightness(0.95);
 }
 
 .secondary-button {
