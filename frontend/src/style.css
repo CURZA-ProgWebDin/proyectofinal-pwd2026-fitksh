@@ -1,7 +1,27 @@
 :root {
-  font-family: Arial, Helvetica, sans-serif;
-  color: #222222;
-  background-color: #f5f5f5;
+  --color-brand: #fe7b1c;
+  --color-accent: #ff5e1e;
+  --color-highlight: #ffd27f;
+
+  --color-primary: #c2410c;
+  --color-background: #fff8f1;
+  --color-surface: #ffffff;
+
+  --color-text: #202124;
+  --color-muted: #5f6368;
+  --color-border: #e3d6cb;
+
+  --color-danger: #b42318;
+  --color-danger-background: #fee4e2;
+  --color-success: #18794e;
+  --color-success-background: #dcfae6;
+  --color-focus: #2962ff;
+
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-background);
 }
 
 * {
@@ -14,6 +34,20 @@ body {
   margin: 0;
 }
 
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
 button,
 input,
 select,
@@ -22,8 +56,97 @@ textarea {
 }
 
 a {
-  color: #2457a7;
+  color: var(--color-primary);
+  text-underline-offset: 3px;
 }
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Botones compartidos */
+
+button {
+  min-height: 44px;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: var(--color-surface);
+  cursor: pointer;
+  background-color: var(--color-primary);
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.secondary-button {
+  color: var(--color-text);
+  background-color: #f2ebe4;
+  border-color: var(--color-border);
+}
+
+.danger-button {
+  background-color: var(--color-danger);
+}
+
+.success-button {
+  background-color: var(--color-success);
+}
+
+/* Campos de formulario */
+
+input,
+select,
+textarea {
+  padding: 10px 12px;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid #8a7f76;
+  border-radius: 8px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+label {
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Mensajes compartidos */
+
+.message,
+.auth-error,
+.auth-success {
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.error-message,
+.auth-error {
+  color: var(--color-danger);
+  background-color: var(--color-danger-background);
+}
+
+.success-message,
+.auth-success {
+  color: var(--color-success);
+  background-color: var(--color-success-background);
+}
+
+/* Login y registro */
 
 .auth-page {
   display: flex;
@@ -37,9 +160,9 @@ a {
   width: 100%;
   max-width: 480px;
   padding: 32px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }
 
 .auth-card h1 {
@@ -59,41 +182,24 @@ a {
 
 .auth-field input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #bbbbbb;
-  border-radius: 4px;
+  min-height: 44px;
 }
 
 .auth-field small {
-  color: #666666;
+  font-size: 0.875rem;
+  color: var(--color-muted);
 }
 
-.auth-form button {
-  padding: 10px 16px;
-  color: white;
-  cursor: pointer;
-  background-color: #2457a7;
-  border: 0;
-  border-radius: 4px;
-}
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.75rem;
+  }
 
-.auth-form button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+  .auth-page {
+    padding: 16px;
+  }
 
-.auth-error,
-.auth-success {
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.auth-error {
-  color: #b42318;
-  background-color: #fee4e2;
-}
-
-.auth-success {
-  color: #18794e;
-  background-color: #dcfae6;
+  .auth-card {
+    padding: 24px;
+  }
 }
