@@ -14,6 +14,8 @@ import { useAuth } from '../stores/auth'
 
 import { getApiErrorMessage } from '../utils/apiErrors'
 
+import localPhoto from '../assets/local-punto-mayorista.jpeg'
+
 const route = useRoute()
 const router = useRouter()
 const auth = useAuth()
@@ -74,58 +76,100 @@ async function submitLogin() {
 
 <template>
   <main class="auth-page">
-    <section class="auth-card">
-      <h1>Iniciar sesión</h1>
+    <div class="login-layout">
+      <div class="login-photo">
+        <img
+          :src="localPhoto"
+          alt="Frente del local de Punto Mayorista en Viedma"
+          width="900"
+          height="1600"
+        >
+      </div>
 
-      <p v-if="registrationMessage" class="auth-success">
-        {{ registrationMessage }}
-      </p>
+      <section
+        class="auth-card"
+        aria-labelledby="login-title"
+      >
+        <p class="auth-brand">
+          Punto Mayorista · Viedma
+        </p>
 
-      <p v-if="errorMessage" class="auth-error">
-        {{ errorMessage }}
-      </p>
+        <h1 id="login-title">
+          Iniciar sesión
+        </h1>
 
-      <form class="auth-form" @submit.prevent="submitLogin">
-        <div class="auth-field">
-          <label for="login-email">Email</label>
+        <p class="auth-description">
+          Accedé a tu cuenta para continuar.
+        </p>
 
-          <input
-            id="login-email"
-            v-model.trim="form.email"
-            type="email"
-            maxlength="150"
-            autocomplete="email"
-            required
+        <p
+          v-if="registrationMessage"
+          class="auth-success"
+          role="status"
+        >
+          {{ registrationMessage }}
+        </p>
+
+        <p
+          v-if="errorMessage"
+          class="auth-error"
+          role="alert"
+        >
+          {{ errorMessage }}
+        </p>
+
+        <form
+          class="auth-form"
+          @submit.prevent="submitLogin"
+        >
+          <div class="auth-field">
+            <label for="login-email">
+              Email
+            </label>
+
+            <input
+              id="login-email"
+              v-model.trim="form.email"
+              type="email"
+              maxlength="150"
+              autocomplete="email"
+              required
+            >
+          </div>
+
+          <div class="auth-field">
+            <label for="login-password">
+              Contraseña
+            </label>
+
+            <input
+              id="login-password"
+              v-model="form.password"
+              type="password"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+
+          <button
+            type="submit"
+            :disabled="submitting"
           >
-        </div>
+            {{ submitting ? 'Ingresando...' : 'Ingresar' }}
+          </button>
+        </form>
 
-        <div class="auth-field">
-          <label for="login-password">Contraseña</label>
+        <p>
+          ¿No tenés una cuenta?
+          <RouterLink to="/register">
+            Registrate
+          </RouterLink>
+        </p>
 
-          <input
-            id="login-password"
-            v-model="form.password"
-            type="password"
-            autocomplete="current-password"
-            required
-          >
-        </div>
-
-        <button type="submit" :disabled="submitting">
-          {{ submitting ? 'Ingresando...' : 'Ingresar' }}
-        </button>
-      </form>
-
-      <p>
-        ¿No tenés una cuenta?
-        <RouterLink to="/register">
-          Registrate
+        <RouterLink to="/">
+          Volver al inicio
         </RouterLink>
-      </p>
-
-      <RouterLink to="/">
-        Volver al inicio
-      </RouterLink>
-    </section>
+      </section>
+    </div>
   </main>
 </template>

@@ -75,9 +75,22 @@ async function submitRegistration() {
 <template>
   <main class="auth-page">
     <section class="auth-card">
+      
+      <p class="auth-brand">
+        Punto Mayorista · Viedma
+      </p>
+
       <h1>Crear cuenta</h1>
 
-      <p v-if="errorMessage" class="auth-error">
+      <p class="auth-description">
+        Registrate para realizar y consultar tus pedidos.
+      </p>
+
+      <p
+        v-if="errorMessage"
+        class="auth-error"
+        role="alert"
+      >
         {{ errorMessage }}
       </p>
 
