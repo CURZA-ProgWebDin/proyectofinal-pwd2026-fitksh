@@ -32,6 +32,7 @@ const editingId = ref(null)
 const errorMessage = ref('')
 const successMessage = ref('')
 const loadError = ref('')
+const categoryNameInput = ref(null)
 
 const form = reactive({
   name: '',
@@ -108,11 +109,14 @@ function startEditing(category) {
   if (isBusy.value) {
     return
   }
+
   clearMessages()
 
   editingId.value = category.id
   form.name = category.name
   form.description = category.description ?? ''
+
+  categoryNameInput.value?.focus()
 }
 
 function cancelEditing() {
@@ -172,39 +176,64 @@ onMounted(loadCategories)
     <header class="page-header">
       <div>
         <h1>Gestión de categorías</h1>
-        <p>
-          Creá, modificá, desactivá o reactivá las categorías
-          disponibles.
-        </p>
+        <p>Organizá las categorías de los productos.</p>
       </div>
 
-      <RouterLink to="/" class="back-link">
+      <RouterLink
+        to="/"
+        class="button-link secondary-button"
+      >
         Volver al inicio
       </RouterLink>
     </header>
 
-    <section class="form-card">
+    <p
+      v-if="errorMessage"
+      class="message error-message"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </p>
+
+    <p
+      v-if="successMessage"
+      class="message success-message"
+      role="status"
+    >
+      {{ successMessage }}
+    </p>
+
+    <section class="panel form-card">
       <h2>
         {{ isEditing ? 'Editar categoría' : 'Nueva categoría' }}
       </h2>
 
-      <form @submit.prevent="submitForm">
-        <div class="form-group">
+      <form
+        class="category-form"
+        @submit.prevent="submitForm"
+      >
+        <div class="form-field">
           <label for="category-name">Nombre</label>
 
           <input
             id="category-name"
+            ref="categoryNameInput"
             v-model.trim="form.name"
             type="text"
             maxlength="100"
             required
+            aria-describedby="category-name-help"
             :disabled="isBusy"
           >
+
+          <small id="category-name-help">
+            Obligatorio. Hasta 100 caracteres.
+          </small>
         </div>
 
-        <div class="form-group">
+        <div class="form-field">
           <label for="category-description">
-            Descripción
+            Descripción (opcional)
           </label>
 
           <textarea
@@ -212,8 +241,13 @@ onMounted(loadCategories)
             v-model.trim="form.description"
             maxlength="255"
             rows="3"
+            aria-describedby="category-description-help"
             :disabled="isBusy"
           />
+
+          <small id="category-description-help">
+            Hasta 255 caracteres.
+          </small>
         </div>
 
         <div class="form-actions">
@@ -234,45 +268,58 @@ onMounted(loadCategories)
             :disabled="isBusy"
             @click="cancelEditing"
           >
-            Cancelar
+            Cancelar edición
           </button>
         </div>
       </form>
     </section>
 
-    <p v-if="errorMessage" class="message error-message">
-      {{ errorMessage }}
-    </p>
-
-    <p v-if="successMessage" class="message success-message">
-      {{ successMessage }}
-    </p>
-
-    <section class="list-card">
+    <section class="panel list-card">
       <h2>Categorías registradas</h2>
 
-      <p v-if="loading">Cargando categorías...</p>
+      <p v-if="loading" class="list-state" role="status">
+        Cargando categorías...
+      </p>
 
-      <p
+      <div
         v-else-if="loadError"
-        class="message error-message"
+        class="message error-message load-error"
         role="alert"
       >
-        {{ loadError }}
-      </p>
+        <p>{{ loadError }}</p>
 
-      <p v-else-if="categories.length === 0">
-        Todavía no hay categorías registradas.
-      </p>
+        <button
+          type="button"
+          class="secondary-button"
+          :disabled="isBusy"
+          @click="loadCategories"
+        >
+          Reintentar
+        </button>
+      </div>
 
-      <div v-else class="table-container">
-        <table>
+      <div
+        v-else-if="categories.length === 0"
+        class="empty-state"
+      >
+        <h3>Todavía no hay categorías</h3>
+        <p>Completá el formulario para crear la primera.</p>
+      </div>
+
+      <div
+        v-else
+        class="table-container"
+        role="region"
+        aria-label="Categorías registradas"
+        tabindex="0"
+      >
+        <table class="data-table categories-table">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Descripción</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Descripción</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
 
@@ -280,10 +327,13 @@ onMounted(loadCategories)
             <tr
               v-for="category in categories"
               :key="category.id"
+              :class="{ 'editing-row': editingId === category.id }"
             >
-              <td>{{ category.name }}</td>
+              <td class="category-name">
+                <strong>{{ category.name }}</strong>
+              </td>
 
-              <td>
+              <td class="category-description">
                 {{ category.description || 'Sin descripción' }}
               </td>
 
@@ -296,32 +346,36 @@ onMounted(loadCategories)
                 </span>
               </td>
 
-              <td class="row-actions">
-                <button
-                  type="button"
-                  class="secondary-button"
-                  :disabled="isBusy"
-                  @click="startEditing(category)"
-                >
-                  Editar
-                </button>
+              <td>
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="secondary-button"
+                    :disabled="isBusy"
+                    @click="startEditing(category)"
+                  >
+                    Editar
+                  </button>
 
-                <button
-                  type="button"
-                  :class="
-                    category.active
-                      ? 'danger-button'
-                      : 'success-button'
-                  "
-                  :disabled="isBusy || changingId === category.id"
-                  @click="changeCategoryStatus(category)"
-                >
-                  {{
-                    category.active
-                      ? 'Desactivar'
-                      : 'Reactivar'
-                  }}
-                </button>
+                  <button
+                    type="button"
+                    :class="
+                      category.active
+                        ? 'danger-button'
+                        : 'success-button'
+                    "
+                    :disabled="isBusy"
+                    @click="changeCategoryStatus(category)"
+                  >
+                    {{
+                      changingId === category.id
+                        ? 'Actualizando...'
+                        : category.active
+                          ? 'Desactivar'
+                          : 'Reactivar'
+                    }}
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -333,9 +387,9 @@ onMounted(loadCategories)
 
 <style scoped>
 .categories-page {
-  width: min(100% - 32px, 1000px);
+  width: min(100% - 32px, 1200px);
   margin: 0 auto;
-  padding: 32px 0;
+  padding: 32px 0 48px;
 }
 
 .page-header {
@@ -346,132 +400,138 @@ onMounted(loadCategories)
   margin-bottom: 24px;
 }
 
-.page-header h1,
-.form-card h2,
-.list-card h2 {
-  margin-top: 0;
+.page-header h1 {
+  margin: 0;
 }
 
 .page-header p {
-  margin-bottom: 0;
-  color: #666666;
+  margin: 8px 0 0;
+  color: var(--color-muted);
 }
 
-.back-link {
-  color: #2457a7;
+.page-header .button-link {
+  flex-shrink: 0;
 }
 
-.form-card,
-.list-card {
+.form-card {
   margin-bottom: 24px;
-  padding: 24px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
 }
 
-.form-group {
+.form-card h2,
+.list-card h2 {
+  margin: 0 0 20px;
+}
+
+.category-form {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.form-field {
+  display: grid;
+  min-width: 0;
+  align-content: start;
   gap: 8px;
-  margin-bottom: 16px;
 }
 
-input,
-textarea {
+.form-field input,
+.form-field textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #bbbbbb;
-  border-radius: 4px;
+  min-width: 0;
 }
 
-textarea {
-  resize: vertical;
+.form-field small {
+  color: var(--color-muted);
 }
 
 .form-actions,
 .row-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
 }
 
-button {
-  padding: 9px 14px;
-  color: white;
-  cursor: pointer;
-  background-color: #2457a7;
-  border: 0;
-  border-radius: 4px;
+.form-actions {
+  grid-column: 1 / -1;
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.row-actions {
+  min-width: 220px;
 }
 
-.secondary-button {
-  color: #222222;
-  background-color: #e5e5e5;
+.list-state {
+  color: var(--color-muted);
 }
 
-.danger-button {
-  background-color: #b42318;
+.load-error p {
+  margin: 0 0 12px;
 }
 
-.success-button {
-  background-color: #18794e;
+.empty-state {
+  padding: 24px 0;
+  text-align: center;
 }
 
-.message {
-  padding: 12px;
-  border-radius: 4px;
+.empty-state h3 {
+  margin: 0 0 8px;
 }
 
-.error-message {
-  color: #b42318;
-  background-color: #fee4e2;
+.empty-state p {
+  margin: 0;
+  color: var(--color-muted);
 }
 
-.success-message {
-  color: #18794e;
-  background-color: #dcfae6;
+.categories-table {
+  min-width: 720px;
 }
 
-.table-container {
-  overflow-x: auto;
+.category-name {
+  min-width: 150px;
+  max-width: 240px;
+  overflow-wrap: anywhere;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.category-description {
+  min-width: 180px;
+  max-width: 420px;
+  overflow-wrap: anywhere;
 }
 
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #dddddd;
+.editing-row {
+  background-color: var(--color-background);
 }
 
 .status {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 16px;
 }
 
 .active {
-  color: #18794e;
-  background-color: #dcfae6;
+  color: var(--color-success);
+  background-color: var(--color-success-background);
 }
 
 .inactive {
-  color: #b42318;
-  background-color: #fee4e2;
+  color: var(--color-muted);
+  background-color: var(--color-background);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .page-header {
-    align-items: flex-start;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .category-form {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
     flex-direction: column;
   }
 }
