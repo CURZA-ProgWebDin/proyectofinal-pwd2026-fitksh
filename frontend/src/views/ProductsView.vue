@@ -305,7 +305,7 @@ onMounted(loadData)
 </script>
 
 <template>
-  <main class="products-page">
+  <main class="admin-page products-page">
     <header class="page-header">
       <div>
         <h1>Gestión de productos</h1>
@@ -317,17 +317,16 @@ onMounted(loadData)
       </div>
 
       <nav class="header-links">
-        <RouterLink to="/categories">
-          Gestionar categorías
-        </RouterLink>
-
-        <RouterLink to="/">
+        <RouterLink
+          to="/"
+          class="button-link secondary-button"
+        >
           Volver al inicio
         </RouterLink>
       </nav>
     </header>
 
-    <section class="form-card">
+    <section class="panel form-card">
       <h2>
         {{ isEditing ? 'Editar producto' : 'Nuevo producto' }}
       </h2>
@@ -504,33 +503,51 @@ onMounted(loadData)
       </form>
     </section>
 
-    <p v-if="errorMessage" class="message error-message">
+    <p v-if="errorMessage" class="message error-message" role="alert">
       {{ errorMessage }}
     </p>
 
-    <p v-if="successMessage" class="message success-message">
+    <p v-if="successMessage" class="message success-message" role="status">
       {{ successMessage }}
     </p>
 
-    <section class="list-card">
+    <section class="panel list-card">
       <h2>Productos registrados</h2>
 
-      <p v-if="loading">Cargando productos...</p>
+      <p v-if="loading" class="list-state" role="status">Cargando productos...</p>
 
-      <p
+      <div
         v-else-if="loadError"
-        class="message error-message"
+        class="message error-message load-error"
         role="alert"
       >
-        {{ loadError }}
-      </p>
+        <p>{{ loadError }}</p>
 
-      <p v-else-if="products.length === 0">
+        <button
+          type="button"
+          class="secondary-button"
+          :disabled="isBusy"
+          @click="loadData"
+        >
+          Reintentar
+        </button>
+      </div>
+
+      <p
+        v-else-if="products.length === 0"
+        class="empty-state"
+      >
         Todavía no hay productos registrados.
       </p>
 
-      <div v-else class="table-container">
-        <table>
+      <div
+        v-else
+        class="table-container"
+        role="region"
+        aria-label="Productos registrados"
+        tabindex="0"
+      >
+        <table class="data-table">
           <thead>
             <tr>
               <th>Producto</th>
@@ -633,179 +650,3 @@ onMounted(loadData)
     </section>
   </main>
 </template>
-
-<style scoped>
-.products-page {
-  width: min(100% - 32px, 1300px);
-  margin: 0 auto;
-  padding: 32px 0;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.page-header h1,
-.form-card h2,
-.list-card h2 {
-  margin-top: 0;
-}
-
-.page-header p {
-  margin-bottom: 0;
-  color: #666666;
-}
-
-.header-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.header-links a {
-  color: #2457a7;
-}
-
-.form-card,
-.list-card {
-  margin-bottom: 24px;
-  padding: 24px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0 16px;
-}
-
-.form-group {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #bbbbbb;
-  border-radius: 4px;
-}
-
-textarea {
-  resize: vertical;
-}
-
-.form-actions,
-.row-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-button {
-  padding: 9px 14px;
-  color: white;
-  cursor: pointer;
-  background-color: #2457a7;
-  border: 0;
-  border-radius: 4px;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.secondary-button {
-  color: #222222;
-  background-color: #e5e5e5;
-}
-
-.danger-button {
-  background-color: #b42318;
-}
-
-.success-button {
-  background-color: #18794e;
-}
-
-.category-warning,
-.message {
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.category-warning {
-  color: #854d0e;
-  background-color: #fef3c7;
-}
-
-.error-message {
-  color: #b42318;
-  background-color: #fee4e2;
-}
-
-.success-message {
-  color: #18794e;
-  background-color: #dcfae6;
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  vertical-align: top;
-  border-bottom: 1px solid #dddddd;
-}
-
-.product-description {
-  display: block;
-  margin-top: 4px;
-  color: #666666;
-}
-
-.status {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-}
-
-.active {
-  color: #18794e;
-  background-color: #dcfae6;
-}
-
-.inactive {
-  color: #b42318;
-  background-color: #fee4e2;
-}
-
-@media (max-width: 700px) {
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
