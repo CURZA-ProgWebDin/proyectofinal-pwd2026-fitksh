@@ -20,6 +20,8 @@ import { formatPrice } from '../utils/formatters'
 
 import { getApiErrorMessage } from '../utils/apiErrors'
 
+import ProductImage from '../components/ProductImage.vue'
+
 const cart = ref(null)
 const quantities = reactive({})
 
@@ -355,11 +357,11 @@ onMounted(loadCart)
               >
                 <td>
                   <div class="product-info">
-                    <img
-                      v-if="item.product.image_url"
+                    <ProductImage
                       :src="item.product.image_url"
                       :alt="item.product.name"
-                    >
+                      small
+                    />
 
                     <div>
                       <strong>{{ item.product.name }}</strong>
@@ -571,13 +573,6 @@ td {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.product-info img {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 4px;
 }
 
 .product-info small {

@@ -16,6 +16,7 @@ import { getProducts } from '../services/productService'
 import { formatPrice } from '../utils/formatters'
 
 import { getApiErrorMessage } from '../utils/apiErrors'
+import ProductImage from '../components/ProductImage.vue'
 
 const products = ref([])
 const cart = ref(null)
@@ -138,58 +139,75 @@ onMounted(loadData)
         <h1>Catálogo de productos</h1>
 
         <p>
-          Seleccioná los productos y cantidades que quieras comprar.
+          Elegí los productos y las cantidades para tu pedido.
         </p>
       </div>
 
-      <nav class="header-links">
-        <RouterLink to="/">
-          Volver al inicio
-        </RouterLink>
-        <RouterLink to="/cart">
-          Ver carrito ({{ cart?.total_quantity ?? 0 }})
-        </RouterLink>
-      </nav>
+      <RouterLink
+        to="/cart"
+        class="button-link secondary-button"
+      >
+        Ver carrito
+      </RouterLink>
     </header>
 
     <section
-      v-if="cart"
+      v-if="cart && !loading && !loadError"
       class="cart-summary"
+      aria-label="Resumen del carrito"
     >
-      <strong>Tu carrito:</strong>
+      <strong>Tu carrito</strong>
+
+      <span>{{ cart.total_quantity }} unidades</span>
 
       <span>
-        {{ cart.total_quantity }} unidades
-      </span>
-
-      <span>
-        Total: {{ formatPrice(cart.total) }}
+        Total: <strong>{{ formatPrice(cart.total) }}</strong>
       </span>
     </section>
 
-    <p v-if="errorMessage" class="message error-message">
+    <p
+      v-if="errorMessage"
+      class="message error-message"
+      role="alert"
+    >
       {{ errorMessage }}
     </p>
 
-    <p v-if="successMessage" class="message success-message">
+    <p
+      v-if="successMessage"
+      class="message success-message"
+      role="status"
+    >
       {{ successMessage }}
     </p>
 
-    <p v-if="loading">
+    <p v-if="loading" class="catalog-state" role="status">
       Cargando productos...
     </p>
 
-    <p
+    <div
       v-else-if="loadError"
       class="message error-message"
       role="alert"
     >
-      {{ loadError }}
-    </p>
+      <p>{{ loadError }}</p>
 
-    <p v-else-if="activeProducts.length === 0">
-      No hay productos disponibles.
-    </p>
+      <button
+        type="button"
+        :disabled="loading"
+        @click="loadData"
+      >
+        Reintentar
+      </button>
+    </div>
+
+    <section
+      v-else-if="activeProducts.length === 0"
+      class="catalog-state"
+    >
+      <h2>No hay productos disponibles</h2>
+      <p>Volvé a consultar más tarde.</p>
+    </section>
 
     <section v-else class="products-grid">
       <article
@@ -197,16 +215,10 @@ onMounted(loadData)
         :key="product.id"
         class="product-card"
       >
-        <img
-          v-if="product.image_url"
+        <ProductImage
           :src="product.image_url"
           :alt="product.name"
-          class="product-image"
-        >
-
-        <div v-else class="image-placeholder">
-          Sin imagen
-        </div>
+        />
 
         <div class="product-content">
           <small>
@@ -215,8 +227,8 @@ onMounted(loadData)
 
           <h2>{{ product.name }}</h2>
 
-          <p class="description">
-            {{ product.description || 'Sin descripción' }}
+          <p v-if="product.description" class="description">
+            {{ product.description }}
           </p>
 
           <p class="price">
@@ -251,8 +263,10 @@ onMounted(loadData)
                 || addingId !== null
               "
             >
+
             <small>
-              Podés agregar {{ getAvailableQuantity(product) }} unidades más.
+              Podés agregar {{ getAvailableQuantity(product) }}
+              unidades más.
             </small>
 
             <button
@@ -280,7 +294,7 @@ onMounted(loadData)
 .catalog-page {
   width: min(100% - 32px, 1200px);
   margin: 0 auto;
-  padding: 32px 0;
+  padding: 32px 0 48px;
 }
 
 .page-header {
@@ -296,136 +310,114 @@ onMounted(loadData)
 }
 
 .page-header p {
-  margin-bottom: 0;
-  color: #666666;
+  margin: 8px 0 0;
+  color: var(--color-muted);
 }
 
-.header-links {
-  display: flex;
-  gap: 16px;
+.page-header .button-link {
+  flex-shrink: 0;
 }
 
 .cart-summary {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px 24px;
   margin-bottom: 24px;
-  padding: 16px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
+  padding: 16px 24px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }
 
-.message {
-  padding: 12px;
-  border-radius: 4px;
+.catalog-state {
+  padding: 32px;
+  color: var(--color-muted);
+  text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }
 
-.error-message {
-  color: #b42318;
-  background-color: #fee4e2;
-}
-
-.success-message {
-  color: #18794e;
-  background-color: #dcfae6;
+.catalog-state h2 {
+  margin-top: 0;
+  color: var(--color-text);
 }
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .product-card {
-  overflow: hidden;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
-}
-
-.product-image,
-.image-placeholder {
-  width: 100%;
-  height: 200px;
-}
-
-.product-image {
-  display: block;
-  object-fit: cover;
-}
-
-.image-placeholder {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666666;
-  background-color: #eeeeee;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }
 
 .product-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 20px;
+  overflow-wrap: anywhere;
 }
 
 .product-content h2 {
-  margin: 8px 0;
+  margin: 8px 0 12px;
+  font-size: 1.25rem;
 }
 
-.product-content small,
+.product-content small {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
 .description {
-  color: #666666;
+  margin: 0 0 16px;
+  color: var(--color-muted);
 }
 
 .price {
-  font-size: 1.3rem;
-  font-weight: bold;
-  color: #18794e;
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .stock {
-  color: #18794e;
+  margin: 0 0 16px;
+  color: var(--color-success);
 }
 
-.unavailable {
-  color: #b42318;
+.stock.unavailable {
+  color: var(--color-danger);
 }
 
 .product-actions {
   display: grid;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .product-actions input {
   width: 100%;
-  padding: 9px;
-  border: 1px solid #bbbbbb;
-  border-radius: 4px;
-}
-
-.product-actions button {
-  padding: 10px;
-  color: white;
-  cursor: pointer;
-  background-color: #2457a7;
-  border: 0;
-  border-radius: 4px;
-}
-
-.product-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  min-height: 44px;
 }
 
 @media (max-width: 900px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 600px) {
   .page-header {
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
   }
 
