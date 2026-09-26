@@ -260,6 +260,42 @@ label {
   border-radius: 0;
 }
 
+/* Paneles y tablas compartidos */
+
+.panel {
+  padding: 24px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.table-container {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 16px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table th {
+  font-weight: 700;
+  background-color: var(--color-background);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 @media (max-width: 760px) {
   .login-layout {
     max-width: 480px;
@@ -282,5 +318,9 @@ label {
 
   .auth-card {
     padding: 24px;
+  }
+
+  .panel {
+    padding: 20px;
   }
 }

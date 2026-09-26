@@ -122,30 +122,21 @@ onMounted(loadOrders)
     <header class="page-header">
       <div>
         <h1>Mis pedidos</h1>
-
-        <p>
-          Consultá el estado y los productos de tus pedidos.
-        </p>
+        <p>Consultá el estado y los productos de tus pedidos.</p>
       </div>
 
-      <nav class="header-links">
-        <RouterLink to="/catalog">
-          Ver catálogo
-        </RouterLink>
-
-        <RouterLink to="/cart">
-          Ver carrito
-        </RouterLink>
-
-        <RouterLink to="/">
-          Volver al inicio
-        </RouterLink>
-      </nav>
+      <RouterLink
+        to="/catalog"
+        class="button-link secondary-button"
+      >
+        Ver catálogo
+      </RouterLink>
     </header>
 
     <p
       v-if="errorMessage"
       class="message error-message"
+      role="alert"
     >
       {{ errorMessage }}
     </p>
@@ -153,43 +144,63 @@ onMounted(loadOrders)
     <p
       v-if="successMessage"
       class="message success-message"
+      role="status"
     >
       {{ successMessage }}
     </p>
 
-    <p v-if="loading">
+    <p
+      v-if="loading"
+      class="panel orders-state"
+      role="status"
+    >
       Cargando pedidos...
     </p>
 
-    <p
+    <section
       v-else-if="loadError"
-      class="message error-message"
-      role="alert"
+      class="panel orders-state"
     >
-      {{ loadError }}
-    </p>
+      <h2>No pudimos cargar tus pedidos</h2>
+
+      <p class="message error-message" role="alert">
+        {{ loadError }}
+      </p>
+
+      <button
+        type="button"
+        :disabled="loading"
+        @click="loadOrders"
+      >
+        Reintentar
+      </button>
+    </section>
 
     <section
       v-else-if="orders.length === 0"
-      class="empty-state"
+      class="panel orders-state"
     >
       <h2>Todavía no tenés pedidos</h2>
 
-      <p>
-        Agregá productos al carrito para crear tu primer
-        pedido.
+      <p class="state-description">
+        Elegí productos del catálogo y agregalos al carrito
+        para crear tu primer pedido.
       </p>
 
-      <RouterLink to="/catalog">
+      <RouterLink to="/catalog" class="button-link">
         Ir al catálogo
       </RouterLink>
     </section>
 
-    <section v-else class="orders-list">
+    <section
+      v-else
+      class="orders-list"
+      aria-label="Listado de pedidos"
+    >
       <article
         v-for="order in orders"
         :key="order.id"
-        class="order-card"
+        class="panel order-card"
       >
         <header class="order-card-header">
           <div>
@@ -208,24 +219,24 @@ onMounted(loadOrders)
           </span>
         </header>
 
-        <div class="order-summary">
+        <dl class="order-summary">
           <div>
-            <span>Productos diferentes</span>
-            <strong>{{ order.details.length }}</strong>
+            <dt>Productos diferentes</dt>
+            <dd>{{ order.details.length }}</dd>
           </div>
 
           <div>
-            <span>Unidades</span>
-            <strong>{{ order.total_quantity }}</strong>
+            <dt>Unidades</dt>
+            <dd>{{ order.total_quantity }}</dd>
           </div>
 
           <div>
-            <span>Total</span>
-            <strong class="total">
+            <dt>Total</dt>
+            <dd class="total">
               {{ formatPrice(order.total) }}
-            </strong>
+            </dd>
           </div>
-        </div>
+        </dl>
 
         <p v-if="order.notes" class="order-notes">
           <strong>Observaciones:</strong>
@@ -236,6 +247,8 @@ onMounted(loadOrders)
           <button
             type="button"
             class="secondary-button"
+            :aria-expanded="expandedOrderId === order.id"
+            :aria-controls="`order-details-${order.id}`"
             @click="toggleDetails(order.id)"
           >
             {{
@@ -261,19 +274,31 @@ onMounted(loadOrders)
         </div>
 
         <section
-          v-if="expandedOrderId === order.id"
+          v-show="expandedOrderId === order.id"
+          :id="`order-details-${order.id}`"
           class="order-details"
         >
           <h3>Detalle del pedido</h3>
 
-          <div class="table-container">
-            <table>
+          <div
+            class="table-container"
+            role="region"
+            :aria-label="`Productos del pedido ${order.id}`"
+            tabindex="0"
+          >
+            <table class="data-table details-table">
               <thead>
                 <tr>
-                  <th>Producto</th>
-                  <th>Precio unitario</th>
-                  <th>Cantidad</th>
-                  <th>Subtotal</th>
+                  <th scope="col">Producto</th>
+                  <th scope="col" class="money">
+                    Precio unitario
+                  </th>
+                  <th scope="col" class="quantity">
+                    Cantidad
+                  </th>
+                  <th scope="col" class="money">
+                    Subtotal
+                  </th>
                 </tr>
               </thead>
 
@@ -282,19 +307,19 @@ onMounted(loadOrders)
                   v-for="detail in order.details"
                   :key="detail.id"
                 >
-                  <td>
+                  <td class="product-name">
                     {{ detail.product.name }}
                   </td>
 
-                  <td>
+                  <td class="money">
                     {{ formatPrice(detail.unit_price) }}
                   </td>
 
-                  <td>
+                  <td class="quantity">
                     {{ detail.quantity }}
                   </td>
 
-                  <td>
+                  <td class="money">
                     {{ formatPrice(detail.subtotal) }}
                   </td>
                 </tr>
@@ -309,9 +334,9 @@ onMounted(loadOrders)
 
 <style scoped>
 .orders-page {
-  width: min(100% - 32px, 1100px);
+  width: min(100% - 32px, 1200px);
   margin: 0 auto;
-  padding: 32px 0;
+  padding: 32px 0 48px;
 }
 
 .page-header {
@@ -327,53 +352,34 @@ onMounted(loadOrders)
 }
 
 .page-header p {
-  margin-bottom: 0;
-  color: #666666;
+  margin: 8px 0 0;
+  color: var(--color-muted);
 }
 
-.header-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+.page-header .button-link {
+  flex-shrink: 0;
 }
 
-.message {
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.error-message {
-  color: #b42318;
-  background-color: #fee4e2;
-}
-
-.success-message {
-  color: #18794e;
-  background-color: #dcfae6;
-}
-
-.empty-state {
-  padding: 32px;
+.orders-state {
   text-align: center;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
 }
 
-.empty-state h2 {
-  margin-top: 0;
+.orders-state h2 {
+  margin: 0 0 12px;
+}
+
+.state-description {
+  margin: 0 0 20px;
+  color: var(--color-muted);
 }
 
 .orders-list {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .order-card {
-  padding: 24px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
+  min-width: 0;
 }
 
 .order-card-header {
@@ -388,20 +394,22 @@ onMounted(loadOrders)
 }
 
 .order-date {
-  margin: 6px 0 0;
-  color: #666666;
+  margin: 8px 0 0;
+  color: var(--color-muted);
 }
 
 .status-badge {
-  padding: 6px 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 16px;
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 20px;
 }
 
 .status-pending {
-  color: #805400;
-  background-color: #fff0c2;
+  color: var(--color-text);
+  background-color: var(--color-highlight);
 }
 
 .status-progress {
@@ -410,42 +418,52 @@ onMounted(loadOrders)
 }
 
 .status-delivered {
-  color: #18794e;
-  background-color: #dcfae6;
+  color: var(--color-success);
+  background-color: var(--color-success-background);
 }
 
 .status-cancelled {
-  color: #b42318;
-  background-color: #fee4e2;
+  color: var(--color-danger);
+  background-color: var(--color-danger-background);
 }
 
 .order-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  margin-top: 20px;
+  margin: 20px 0 0;
 }
 
 .order-summary div {
   display: grid;
-  gap: 4px;
-  padding: 12px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
+  gap: 6px;
+  padding: 16px;
+  background-color: var(--color-background);
+  border-radius: 8px;
 }
 
-.order-summary span {
-  color: #666666;
+.order-summary dt {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.order-summary dd {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .total {
-  color: #18794e;
+  color: var(--color-primary);
 }
 
 .order-notes {
-  padding: 12px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  overflow-wrap: anywhere;
+  background-color: var(--color-background);
+  border-radius: 8px;
 }
 
 .order-actions {
@@ -455,64 +473,51 @@ onMounted(loadOrders)
   margin-top: 20px;
 }
 
-button {
-  padding: 9px 14px;
-  color: white;
-  cursor: pointer;
-  background-color: #2457a7;
-  border: 0;
-  border-radius: 4px;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.secondary-button {
-  color: #222222;
-  background-color: #e5e5e5;
-}
-
-.danger-button {
-  background-color: #b42318;
-}
-
 .order-details {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #dddddd;
+  border-top: 1px solid var(--color-border);
 }
 
 .order-details h3 {
-  margin-top: 0;
+  margin: 0 0 16px;
 }
 
-.table-container {
-  overflow-x: auto;
+.details-table {
+  min-width: 600px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.product-name {
+  min-width: 180px;
+  max-width: 320px;
+  overflow-wrap: anywhere;
 }
 
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #dddddd;
+.money {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.quantity {
+  text-align: center;
 }
 
 @media (max-width: 700px) {
-  .page-header,
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .order-card-header {
-    align-items: flex-start;
     flex-direction: column;
   }
 
   .order-summary {
     grid-template-columns: 1fr;
+  }
+
+  .order-actions {
+    flex-direction: column;
   }
 }
 </style>
