@@ -1,0 +1,159 @@
+Project punto_mayorista {
+  database_type: 'PostgreSQL'
+  Note: 'Base de datos de la tienda Punto Mayorista'
+}
+
+Table roles {
+  id_rol integer [pk, increment]
+  nombre varchar(30) [not null, unique]
+  descripcion varchar(255)
+  activo boolean [not null, default: true]
+  creado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table usuarios {
+  id_usuario bigint [pk, increment]
+  id_rol integer [not null]
+  nombre varchar(80) [not null]
+  apellido varchar(80) [not null]
+  email varchar(150) [not null, unique]
+  password_hash varchar(255) [not null, note: 'Contraseña almacenada como hash']
+  activo boolean [not null, default: true]
+  creado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  actualizado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table refresh_tokens {
+  id_refresh_token bigint [pk, increment]
+  id_usuario bigint [not null]
+  identificador_token varchar(255) [not null, unique]
+  expira_en timestamp [not null]
+  revocado_en timestamp
+  creado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table categorias {
+  id_categoria bigint [pk, increment]
+  nombre varchar(100) [not null, unique]
+  descripcion varchar(255)
+  activo boolean [not null, default: true]
+  creado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  actualizado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table productos {
+  id_producto bigint [pk, increment]
+  id_categoria bigint [not null]
+  nombre varchar(150) [not null]
+  descripcion text
+  precio_minorista numeric(12,2) [not null]
+  precio_mayorista numeric(12,2) [not null]
+  cantidad_minima_mayorista integer [not null, default: 1]
+  stock integer [not null, default: 0]
+  imagen_url varchar(500)
+  activo boolean [not null, default: true]
+  creado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  actualizado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    nombre [name: 'idx_productos_nombre']
+    id_categoria [name: 'idx_productos_categoria']
+  }
+
+  checks {
+    `precio_minorista >= 0` [name: 'chk_precio_minorista']
+    `precio_mayorista >= 0` [name: 'chk_precio_mayorista']
+    `cantidad_minima_mayorista > 0` [name: 'chk_cantidad_mayorista']
+    `stock >= 0` [name: 'chk_stock']
+  }
+}
+
+Table carritos {
+  id_carrito bigint [pk, increment]
+  id_usuario bigint [not null, unique]
+  creado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  actualizado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table carrito_items {
+  id_carrito_item bigint [pk, increment]
+  id_carrito bigint [not null]
+  id_producto bigint [not null]
+  cantidad integer [not null]
+  agregado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (id_carrito, id_producto) [unique, name: 'uq_carrito_producto']
+  }
+
+  checks {
+    `cantidad > 0` [name: 'chk_carrito_cantidad']
+  }
+}
+
+Table estados_pedido {
+  id_estado_pedido integer [pk, increment]
+  nombre varchar(30) [not null, unique, note:'''
+    - PENDIENTE
+    - CONFIRMADO
+    - EN_PREPARACION
+    - LISTO
+    - ENTREGADO
+    - CANCELADO
+  ''']
+  descripcion varchar(255) [note:'''
+    Podría ser un help text para usario o administrador
+  ''']
+}
+
+Table pedidos {
+  id_pedido bigint [pk, increment]
+  id_usuario bigint [not null]
+  id_estado_pedido integer [not null]
+  fecha_pedido timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  observaciones text
+  actualizado_en timestamp [not null, default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    id_usuario [name: 'idx_pedidos_usuario']
+    id_estado_pedido [name: 'idx_pedidos_estado']
+  }
+}
+
+Table pedido_detalles {
+  id_pedido_detalle bigint [pk, increment]
+  id_pedido bigint [not null]
+  id_producto bigint [not null]
+  cantidad integer [not null]
+  precio_unitario numeric(12,2) [not null]
+  es_precio_mayorista boolean [not null, default: false]
+
+  indexes {
+    (id_pedido, id_producto) [unique, name: 'uq_pedido_producto']
+  }
+
+  checks {
+    `cantidad > 0` [name: 'chk_detalle_cantidad']
+    `precio_unitario >= 0` [name: 'chk_detalle_precio']
+  }
+}
+
+Ref: usuarios.id_rol > roles.id_rol [delete: restrict]
+
+Ref: refresh_tokens.id_usuario > usuarios.id_usuario [delete: cascade]
+
+Ref: productos.id_categoria > categorias.id_categoria [delete: restrict]
+
+Ref: carritos.id_usuario > usuarios.id_usuario [delete: cascade]
+
+Ref: carrito_items.id_carrito > carritos.id_carrito [delete: cascade]
+
+Ref: carrito_items.id_producto > productos.id_producto [delete: restrict]
+
+Ref: pedidos.id_usuario > usuarios.id_usuario [delete: restrict]
+
+Ref: pedidos.id_estado_pedido > estados_pedido.id_estado_pedido [delete: restrict]
+
+Ref: pedido_detalles.id_pedido > pedidos.id_pedido [delete: cascade]
+
+Ref: pedido_detalles.id_producto > productos.id_producto [delete: restrict]

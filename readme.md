@@ -80,3 +80,8 @@ git
 - No se aceptarán proyectos que no cumplan los requisitos mínimos.  
 - Se valorará la coherencia del diseño del sistema y la correcta separación de responsabilidades.  
 - Se espera que el estudiante seleccione un dominio de aplicación propio, evitando replicar ejemplos vistos en clase de forma literal.  
+
+## Modelo de base de datos
+
+- [Diagrama interactivo en dbdiagram.io](https://dbdiagram.io/d/6a83b416e093539a9ed2e717)
+- [Código DBML versionado](docs/database.dbml)
