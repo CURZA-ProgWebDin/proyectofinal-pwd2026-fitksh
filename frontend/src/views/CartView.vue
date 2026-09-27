@@ -260,25 +260,32 @@ onMounted(loadCart)
       </div>
 
       <nav class="header-links">
-        <RouterLink to="/catalog">
+        <RouterLink
+          to="/catalog"
+          class="button-link secondary-button"
+        >
           Seguir comprando
-        </RouterLink>
-
-        <RouterLink to="/">
-          Volver al inicio
         </RouterLink>
       </nav>
     </header>
 
-    <p v-if="errorMessage" class="message error-message">
+    <p
+      v-if="errorMessage"
+      class="message error-message"
+      role="alert"
+    >
       {{ errorMessage }}
     </p>
 
-    <p v-if="successMessage" class="message success-message">
+    <p
+      v-if="successMessage && !createdOrder"
+      class="message success-message"
+      role="status"
+    >
       {{ successMessage }}
     </p>
 
-    <p v-if="loading">
+    <p v-if="loading" class="panel cart-state" role="status">
       Cargando carrito...
     </p>
 
@@ -298,48 +305,62 @@ onMounted(loadCart)
       </button>
     </div>
 
-    <section
-    v-else-if="!hasItems"
-    class="empty-cart"
-    >
-    <h2>Tu carrito está vacío</h2>
+  <section
+  v-else-if="!hasItems"
+  class="panel cart-state"
+  >
+    <template v-if="createdOrder">
+      <h2>Pedido #{{ createdOrder.id }} creado</h2>
 
-    <div
-      v-if="createdOrder"
-      class="created-order"
-    >
       <p>
-        Se creó el pedido
-        <strong>#{{ createdOrder.id }}</strong>.
+        Estado:
+        <strong>{{ createdOrder.status.name }}</strong>
       </p>
 
       <p>
-        Estado: {{ createdOrder.status.name }}
+        Total:
+        <strong>{{ formatPrice(createdOrder.total) }}</strong>
       </p>
 
-      <p>
-        Total: {{ formatPrice(createdOrder.total) }}
+      <div class="state-actions">
+        <RouterLink to="/my-orders" class="button-link">
+          Ver mis pedidos
+        </RouterLink>
+
+        <RouterLink
+          to="/catalog"
+          class="button-link secondary-button"
+        >
+          Seguir comprando
+        </RouterLink>
+      </div>
+    </template>
+
+    <template v-else>
+      <h2>Tu carrito está vacío</h2>
+
+      <p class="state-description">
+        Agregá productos desde el catálogo para comenzar.
       </p>
 
-      <RouterLink to="/my-orders">
-        Ver mis pedidos
+      <RouterLink to="/catalog" class="button-link">
+        Ir al catálogo
       </RouterLink>
-    </div>
-
-    <p>
-      Agregá productos desde el catálogo para comenzar
-      una compra.
-    </p>
-
-    <RouterLink to="/catalog">
-      Ir al catálogo
-    </RouterLink>
+    </template>
   </section>
 
     <template v-else>
-      <section class="cart-card">
-        <div class="table-container">
-          <table>
+      <section class="panel cart-card">
+        <p class="cart-help">
+          Después de modificar una cantidad, presioná Actualizar.
+        </p>
+        <div
+          class="table-container"
+          role="region"
+          aria-label="Productos del carrito"
+          tabindex="0"
+        >
+          <table class="data-table cart-table">
             <thead>
               <tr>
                 <th>Producto</th>
@@ -397,6 +418,7 @@ onMounted(loadCart)
                       :max="item.product.stock"
                       step="1"
                       :disabled="isBusy || !item.product.active"
+                      :aria-label="`Cantidad de ${item.product.name}`"
                     >
 
                     <button
@@ -430,7 +452,7 @@ onMounted(loadCart)
         </div>
       </section>
 
-      <section class="cart-summary">
+      <section class="panel cart-summary">
         <div>
           <span>Productos diferentes</span>
           <strong>{{ cart.item_count }}</strong>
@@ -458,7 +480,7 @@ onMounted(loadCart)
         </button>
       </section>
 
-      <section class="checkout-card">
+      <section class="panel checkout-card">
         <div>
           <label for="order-notes">
             Observaciones del pedido
@@ -494,7 +516,7 @@ onMounted(loadCart)
 .cart-page {
   width: min(100% - 32px, 1200px);
   margin: 0 auto;
-  padding: 32px 0;
+  padding: 32px 0 48px;
 }
 
 .page-header {
@@ -510,69 +532,55 @@ onMounted(loadCart)
 }
 
 .page-header p {
-  margin-bottom: 0;
-  color: #666666;
+  margin: 8px 0 0;
+  color: var(--color-muted);
 }
 
-.header-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+.page-header .button-link {
+  flex-shrink: 0;
 }
 
-.message {
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.error-message {
-  color: #b42318;
-  background-color: #fee4e2;
-}
-
-.success-message {
-  color: #18794e;
-  background-color: #dcfae6;
-}
-
-.empty-cart,
-.cart-card,
-.cart-summary {
-  padding: 24px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
-}
-
-.empty-cart {
+.cart-state {
   text-align: center;
 }
 
-.empty-cart h2 {
-  margin-top: 0;
+.cart-state h2 {
+  margin: 0 0 12px;
 }
 
-.table-container {
-  overflow-x: auto;
+.state-description {
+  margin: 0 0 20px;
+  color: var(--color-muted);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.state-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
 }
 
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  vertical-align: middle;
-  border-bottom: 1px solid #dddddd;
+.cart-help {
+  margin: 0 0 16px;
+  color: var(--color-muted);
+}
+
+.cart-table {
+  min-width: 900px;
 }
 
 .product-info {
   display: flex;
+  min-width: 220px;
+  max-width: 340px;
   align-items: center;
   gap: 12px;
+}
+
+.product-info > div:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .product-info small {
@@ -581,54 +589,31 @@ td {
 }
 
 .stock-information {
-  color: #666666;
+  color: var(--color-muted);
 }
 
 .unavailable {
-  color: #b42318;
+  color: var(--color-danger);
 }
 
 .quantity-control {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
 .quantity-control input {
-  width: 80px;
-  padding: 8px;
-  border: 1px solid #bbbbbb;
-  border-radius: 4px;
-}
-
-button {
-  padding: 9px 14px;
-  color: white;
-  cursor: pointer;
-  background-color: #2457a7;
-  border: 0;
-  border-radius: 4px;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.secondary-button {
-  color: #222222;
-  background-color: #e5e5e5;
-}
-
-.danger-button {
-  background-color: #b42318;
+  width: 84px;
+  min-height: 44px;
+  flex-shrink: 0;
 }
 
 .cart-summary {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 32px;
+  gap: 24px;
   margin-top: 24px;
 }
 
@@ -638,22 +623,18 @@ button:disabled {
 }
 
 .cart-summary span {
-  color: #666666;
+  color: var(--color-muted);
 }
 
 .total {
-  font-size: 1.3rem;
-  color: #18794e;
+  font-size: 1.5rem;
+  color: var(--color-primary);
 }
 
 .checkout-card {
   display: grid;
   gap: 16px;
   margin-top: 24px;
-  padding: 24px;
-  background-color: white;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
 }
 
 .checkout-card div {
@@ -661,43 +642,18 @@ button:disabled {
   gap: 8px;
 }
 
-.checkout-card label {
-  font-weight: 600;
-}
-
 .checkout-card textarea {
   width: 100%;
-  box-sizing: border-box;
-  padding: 10px;
-  font: inherit;
-  resize: vertical;
-  border: 1px solid #bbbbbb;
-  border-radius: 4px;
 }
 
 .checkout-card button {
   justify-self: end;
 }
 
-.created-order {
-  margin-bottom: 16px;
-  padding: 16px;
-  color: #18794e;
-  background-color: #dcfae6;
-  border-radius: 6px;
-}
-
-.created-order p {
-  margin: 4px 0;
-}
-
 @media (max-width: 700px) {
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .cart-summary {
+  .page-header,
+  .cart-summary,
+  .state-actions {
     align-items: stretch;
     flex-direction: column;
   }
@@ -706,5 +662,4 @@ button:disabled {
     width: 100%;
   }
 }
-
 </style>
